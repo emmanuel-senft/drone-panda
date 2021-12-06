@@ -20,6 +20,8 @@
         <param name="use_relaxed_ik" type="bool" value="false" />
         <param name="only_virtual" value="true" />
     </node>
+    <node pkg="drone_panda" type="drone_controller" name="drone_controller" output="screen">
+    </node>
 
    <node pkg="drone_panda" type="virtual_drone_manager" name="virtual_camera_manager" output="screen"/> 
     <!-- <node name="uncompress_client" pkg="image_transport" type="republish" args="compressed in:=/client/camera/image_raw raw out:=/client/camera/image_raw">
@@ -40,6 +42,8 @@
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="sim_ee_transform" />
     </node>
-
-    <node pkg="drone_panda" type="pandaJacob" name="pandaJacob"/>
+    
+    <node pkg="panda_ik" type="panda_ik" name="panda_ik">
+        <param name="URDF" type="string" value="/home/senft/catkin_ws/src/drone-panda/urdfs/panda_arm_hand.urdf" />
+    </node>
 </launch>

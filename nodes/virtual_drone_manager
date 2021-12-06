@@ -9,10 +9,14 @@ import tf
 from tf.transformations import *
 import tf2_ros
 from geometry_msgs.msg import Pose, Twist, Quaternion, TransformStamped
+from tf.transformations import quaternion_from_euler as q_e
+from tf.transformations import euler_from_quaternion as e_q
 from tf2_geometry_msgs import PoseStamped
 from sensor_msgs.msg import CameraInfo
 from std_msgs.msg import String
 import copy
+from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Slerp
 
 REFERENCE_FRAME='panda_link0'
 
@@ -53,23 +57,25 @@ class VirtualDrone(object):
 
         t.child_frame_id = "drone"
 
-        t.transform.translation.x = 2
+        t.transform.translation.x = 1
         t.transform.translation.y = 0
         t.transform.translation.z = .5
         t.transform.rotation.z = 1
 
         self._freq = 100
 
+        self._goal = None
+        self._max_v_lin = .1
+        self._max_v_rot = .1
+
         self._br.sendTransform(t)
         self._drone_transform = t
         self._vel_sub = rospy.Subscriber("/drone/vel", Twist, self.on_twist)
-
             
     def on_twist(self, msg):
         self._twist = msg
 
     def publish_drone_pose(self):
-
         q = PyKDL.Rotation.RPY(self._twist.angular.x/self._freq,self._twist.angular.y/self._freq,self._twist.angular.z/self._freq).GetQuaternion()
         p = PoseStamped()
         p.header.stamp = rospy.Time(0)
@@ -96,17 +102,6 @@ class VirtualDrone(object):
         self._drone_transform.header.stamp = rospy.Time.now()
         self._br.sendTransform(self._drone_transform)
         return
-
-        #print("Free flying")
-        t = self._tfBuffer.lookup_transform("panda","client_camera", rospy.Time(0))
-        t.transform.translation.x = coef*t.transform.translation.x
-        t.transform.translation.y = 1.5*coef*t.transform.translation.y
-        t.transform.translation.z = coef*t.transform.translation.z
-        t.header.frame_id = "panda_link0"
-        t.child_frame_id = "camera1"
-        t.header.stamp = rospy.Time.now()
-        self._last_t = t
-        self._br.sendTransform(t)
 
     def run(self):
         r = rospy.Rate(self._freq)

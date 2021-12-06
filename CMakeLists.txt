@@ -13,7 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
         image_transport 
         visualization_msgs
         image_geometry 
-        ros_numpy
         rviz_camera_stream
         sensor_msgs
         )
@@ -41,7 +40,6 @@ catkin_package(
 #  LIBRARIES 
   CATKIN_DEPENDS 
     tf
-    ros_numpy
     sensor_msgs
   DEPENDS OpenCV
   LIBRARIES 
@@ -100,6 +98,7 @@ catkin_install_python(PROGRAMS
     nodes/virtual_drone_manager
     nodes/pc_publish
     nodes/rviz_manager
+    nodes/drone_controller
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(TARGETS pandaJacob

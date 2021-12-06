@@ -43,12 +43,10 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>tf</build_depend>
   <build_depend>rviz_camera_stream</build_depend>
-  <build_depend>ros_numpy</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <run_depend>tf</run_depend>
   <run_depend>rviz_camera_stream</run_depend>
-  <run_depend>ros_numpy</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
 

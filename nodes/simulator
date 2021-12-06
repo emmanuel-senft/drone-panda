@@ -9,12 +9,11 @@ import tf2_ros
 import PyKDL
 import copy
 
-from std_msgs.msg import String
+from std_msgs.msg import String, Float64MultiArray
 from nav_msgs.msg import Path
 
-from panda_ros_msgs.msg import HybridPose, JointPose
 from sensor_msgs.msg import JointState
-from geometry_msgs.msg import Twist,TwistStamped
+from geometry_msgs.msg import Twist, TwistStamped, Pose, PoseStamped
 
 import numpy as np 
 
@@ -22,6 +21,7 @@ REFERENCE_FRAME='panda_link0'
 
 class Simulator(object):
     def __init__(self):
+        print("STARTING")
         self._tfBuffer = tf2_ros.Buffer()
         self._tl = tf2_ros.TransformListener(self._tfBuffer)
         self._br = tf.TransformBroadcaster()
@@ -29,8 +29,7 @@ class Simulator(object):
         #Rviz value
         self._viz_pub = rospy.Publisher("/simulator/joint_states", JointState, queue_size = 5)
         rospy.sleep(1.) # sleep a bit to make sure the TF cache is filled
-        self._event_sub = rospy.Subscriber("/event",String, self.on_event)
-        self._pose_sub = rospy.Subscriber("/simulator/hybrid_pose", HybridPose, self.on_pose)
+        self._event_sub = rospy.Subscriber("/event", String, self.on_event)
         self._event_pub = rospy.Publisher("/simulator/events", String, queue_size=5)
         
         #Simulator State
@@ -44,73 +43,20 @@ class Simulator(object):
         self._pre_sim_joints = copy.deepcopy(self._current_joint)
         self._current_velocity = [0,0,0,0,0,0,0]
         self._freq = 100
-        self._vel_sub = rospy.Subscriber("/jacob/joint_vel", JointPose, self.on_vel)
-        self._vel_sub2 = rospy.Subscriber("/simulator/joint_pose", JointPose, self.on_joint)
-        self._command_sub = rospy.Subscriber("/simulator/commands", String, self.on_command, queue_size = 1)
-        self._cart_vel_pub = rospy.Publisher("/simulator/cart_vel", Twist, queue_size=5)
-        self._cart_vel_cam_pub = rospy.Publisher("/simulator/cart_vel_cam", Twist, queue_size=5)
-        #Panda State
-        self._panda_angle_sub = rospy.Subscriber("/panda/joint_states", JointState, self.on_state, queue_size=1)
-
+        
         #Publish init state for the robot
         self.init_states()
         self._init = False
-        self._desired_joint_pose = None
+        self._desired_joint_pose = copy.deepcopy(self._current_joint)        
 
-        self._virtual = rospy.get_param('~only_virtual')
-        self._cam_control = False
-
-        self._pause = False
-        self._cart_vel_sub = rospy.Subscriber("/panda/cart_velocity", TwistStamped, self.on_cart_vel)
+        self._command_sub = rospy.Subscriber("/simulator/commands", String, self.on_command, queue_size = 1)
+        self._command_sub = rospy.Subscriber("/panda_ik/output", Float64MultiArray, self.on_joints, queue_size = 1)
+        self._cart_vel_pub = rospy.Publisher("/simulator/cart_vel", Twist, queue_size=5)
+        self._cart_vel_cam_pub = rospy.Publisher("/drone/vel", Twist, queue_size=5)
         
 
-    def on_pose(self, msg):
-        goal = msg.pose
-        ee_frame = "sim_panda_gripper"
-        if self._cam_control:
-            ee_frame = "rotated_camera"
-        t = self._tfBuffer.lookup_transform(REFERENCE_FRAME, ee_frame, rospy.Time(0))
-        q = msg.constraint_frame
-        self.get_trans_rot(t.transform,q)
-
-        k_force = .001 #.001
-
-        if msg.sel_vector[0] == 0:
-            goal.position.x = t.transform.translation.x + k_force * msg.wrench.force.x
-        if msg.sel_vector[1] == 0:
-            goal.position.y = t.transform.translation.y + k_force * msg.wrench.force.y
-        if msg.sel_vector[2] == 0:
-            goal.position.z = t.transform.translation.z + k_force * msg.wrench.force.z
-
-        q_inv = copy.deepcopy(q)
-        q_inv.x = -q_inv.x
-        q_inv.y = -q_inv.y
-        q_inv.z = -q_inv.z
-
-        self.get_trans_rot(t.transform,q_inv)
-        self.get_pose_rot(goal,q_inv)
-        linear,angular = self.get_diff_pose_trans(goal,t)
-        #print("****")
-        #print(q)
-        #print(angular)
-        #linear,angular = self.get_lin_ang_rot(linear,angular,q) 
-        #print(angular)
-        
-        k_velocity = 5
-        if self._cam_control:
-            k_velocity = 5
-
-        vel = Twist()
-        vel.linear.x =  k_velocity*linear[0] 
-        vel.linear.y =  k_velocity*linear[1]
-        vel.linear.z =  k_velocity*linear[2]
-        vel.angular.x = k_velocity*angular[0]
-        vel.angular.y = k_velocity*angular[1]
-        vel.angular.z = k_velocity*angular[2]
-        if self._cam_control:
-            self._cart_vel_cam_pub.publish(vel)
-        else:
-            self._cart_vel_pub.publish(vel)
+    def on_joints(self, msg):
+        self._desired_joint_pose[:7] = list(msg.data)
 
     def init_states(self):
         joint = JointState()
@@ -132,34 +78,29 @@ class Simulator(object):
             self.move()
             r.sleep()
 
+    def clamp(self, val, bound):
+        return min(bound,max(-bound, val))
+
     def move(self):
-        if (self._sim or not self._init) and not self._pause:
-            if self._desired_joint_pose is not None:
-                progress = min(1,(rospy.Time.now() -self._starting_time).to_sec()/(self._desired_joint_pose.header.stamp - self._starting_time).to_sec())
-                
-                desired_joint = list(self._desired_joint_pose.joint_pose)+[self._current_joint[-2],self._current_joint[-1]]
-                joint = JointState()
-                joint.header.stamp = rospy.Time.now()
-                joint.name = ["panda_joint1", "panda_joint2","panda_joint3","panda_joint4","panda_joint5","panda_joint6","panda_joint7","panda_finger_joint1","panda_finger_joint2"]
-                self._current_joint = [s+progress*(d-s) for s,d in zip(self._starting_joint,desired_joint)]
-                joint.position = self._current_joint
-                self._viz_pub.publish(joint)
-                if progress == 1:
-                    self._desired_joint_pose = None
-                return    
-            for i,v in enumerate(self._current_velocity):
-                self._current_joint[i]+=v/self._freq
+        if self._desired_joint_pose != self._current_joint:            
             joint = JointState()
             joint.header.stamp = rospy.Time.now()
             joint.name = ["panda_joint1", "panda_joint2","panda_joint3","panda_joint4","panda_joint5","panda_joint6","panda_joint7","panda_finger_joint1","panda_finger_joint2"]
-            joint.position = list(self._current_joint)
+            self._current_joint = [s+self.clamp((d-s),.005) for s,d in zip(self._current_joint,self._desired_joint_pose)]
+            joint.position = self._current_joint
             self._viz_pub.publish(joint)
+            return    
+        joint = JointState()
+        joint.header.stamp = rospy.Time.now()
+        joint.name = ["panda_joint1", "panda_joint2","panda_joint3","panda_joint4","panda_joint5","panda_joint6","panda_joint7","panda_finger_joint1","panda_finger_joint2"]
+        joint.position = list(self._current_joint)
+        self._viz_pub.publish(joint)
 
-    def on_joint(self, msg):
-        self._current_velocity = [0,0,0,0,0,0,0]
-        self._desired_joint_pose = msg
-        self._starting_joint = copy.deepcopy(self._current_joint)
-        self._starting_time = rospy.Time.now()
+#    def on_joint(self, msg):
+#        self._current_velocity = [0,0,0,0,0,0,0]
+#        self._desired_joint_pose = msg
+#        self._starting_joint = copy.deepcopy(self._current_joint)
+#        self._starting_time = rospy.Time.now()
 
     def on_event(self, msg):
         cmd = msg.data.split(";")[0]

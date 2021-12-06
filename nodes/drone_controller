@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+import numpy as np
+import math
+import rospy
+import PyKDL
+import signal
+import sys
+import tf
+from tf.transformations import *
+import tf2_ros
+from geometry_msgs.msg import Pose, Twist, Quaternion, TransformStamped
+from tf.transformations import quaternion_from_euler as q_e
+from tf.transformations import euler_from_quaternion as e_q
+from tf2_geometry_msgs import PoseStamped
+from sensor_msgs.msg import CameraInfo
+from std_msgs.msg import String
+import copy
+
+REFERENCE_FRAME='panda_link0'
+
+class VirtualDrone(object):
+    def __init__(self):
+        self._br = tf2_ros.TransformBroadcaster()
+        self._tfBuffer = tf2_ros.Buffer()
+        self._tl = tf2_ros.TransformListener(self._tfBuffer)
+        rospy.sleep(.5)
+
+        self._twist = Twist()
+        t = TransformStamped()
+        t.header.frame_id = REFERENCE_FRAME
+        t.header.stamp = rospy.Time.now()
+
+        t.child_frame_id = "drone"
+
+        t.transform.translation.x = 1
+        t.transform.translation.y = 0
+        t.transform.translation.z = .5
+        t.transform.rotation.z = 1
+
+        self._freq = 100
+
+        self._goal = None
+        self._max_v_lin = .2
+        self._max_v_rot = .4
+        self._k_lin = .5
+        self._k_rot = .5
+
+        self._vel_pub = rospy.Publisher("/drone/vel",Twist,queue_size=1,latch=True)
+        self._pose_sub = rospy.Subscriber("/panda_ik/drone_output", PoseStamped, self.on_pose)
+
+    def on_pose(self, msg):
+        print("Got message")
+        self._goal = msg
+
+    def clamp(self, val, bound):
+        return min(bound,max(-bound, val))
+
+    def publish_drone_vel(self):
+        if self._goal is not None:
+            pose = self._tfBuffer.transform(self._goal,"drone")            
+            self._twist.linear.x =  self.clamp(self._k_lin * (pose.pose.position.x),self._max_v_lin)
+            self._twist.linear.y =  self.clamp(self._k_lin * (pose.pose.position.y),self._max_v_lin)
+            self._twist.linear.z =  self.clamp(self._k_lin * (pose.pose.position.z),self._max_v_lin)
+            q_pose = e_q([pose.pose.orientation.x,pose.pose.orientation.y,pose.pose.orientation.z,pose.pose.orientation.w])
+            self._twist.angular.z = self.clamp(self._k_rot * q_pose[2],self._max_v_rot)
+        else:
+            self._twist = Twist()
+
+        self._vel_pub.publish(self._twist)
+        
+
+    def run(self):
+        r = rospy.Rate(self._freq)
+        while not rospy.is_shutdown():
+            self.publish_drone_vel()
+            r.sleep()
+
+    def signal_handler(self, signal, frame):
+        sys.exit()
+
+if __name__ == "__main__":
+    rospy.init_node('virtual_drone')
+    virtual_drone = VirtualDrone()
+    signal.signal(signal.SIGINT, virtual_drone.signal_handler)
+    virtual_drone.run()
