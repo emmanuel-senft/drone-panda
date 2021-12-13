@@ -62,11 +62,6 @@ set(LIBS
     ${OpenCV_LIBRARIES}
     )
 
-add_executable(pandaJacob src/jacob.cpp)
-target_include_directories(pandaJacob PUBLIC adept${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} /home/senft/catkin_ws/devel/include )
-target_link_libraries(pandaJacob
-   ${catkin_LIBRARIES}
-)
 #############
 ## Install ##
 #############
@@ -101,7 +96,4 @@ catkin_install_python(PROGRAMS
     nodes/drone_controller
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-install(TARGETS pandaJacob
-  RUNTIME DESTINATION lib/drone_panda
-)
 
