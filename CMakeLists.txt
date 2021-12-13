@@ -94,6 +94,7 @@ catkin_install_python(PROGRAMS
     nodes/pc_publish
     nodes/rviz_manager
     nodes/drone_controller
+    nodes/tello_driver
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 
