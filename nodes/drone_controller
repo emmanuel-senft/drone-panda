@@ -17,6 +17,7 @@ from std_msgs.msg import String
 import copy
 
 REFERENCE_FRAME='panda_link0'
+#REFERENCE_FRAME='mocap_world'
 
 class VirtualDrone(object):
     def __init__(self):
@@ -40,17 +41,18 @@ class VirtualDrone(object):
         self._freq = 100
 
         self._goal = None
-        self._max_v_lin = .2
-        self._max_v_rot = .4
-        self._k_lin = .5
-        self._k_rot = .5
-
-        self._vel_pub = rospy.Publisher("/drone/vel",Twist,queue_size=1,latch=True)
+        self._max_v_lin = .25
+        self._max_v_rot = 1#.4
+        self._k_lin = 2
+        #self._k_rot = .3
+        self._k_rot = 2
+        #self._vel_pub = rospy.Publisher("/tello/vel",Twist,queue_size=1,latch=True)
+        self._vel_pub = rospy.Publisher("/tello/vel",Twist,queue_size=1,latch=True)
         self._pose_sub = rospy.Subscriber("/panda_ik/drone_output", PoseStamped, self.on_pose)
 
     def on_pose(self, msg):
-        print("Got message")
         self._goal = msg
+        self.publish_drone_vel()
 
     def clamp(self, val, bound):
         return min(bound,max(-bound, val))

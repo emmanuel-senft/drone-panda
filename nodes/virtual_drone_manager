@@ -70,7 +70,7 @@ class VirtualDrone(object):
 
         self._br.sendTransform(t)
         self._drone_transform = t
-        self._vel_sub = rospy.Subscriber("/drone/vel", Twist, self.on_twist)
+        self._vel_sub = rospy.Subscriber("/tello/vel", Twist, self.on_twist)
             
     def on_twist(self, msg):
         self._twist = msg

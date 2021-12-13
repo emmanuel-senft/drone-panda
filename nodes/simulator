@@ -52,7 +52,7 @@ class Simulator(object):
         self._command_sub = rospy.Subscriber("/simulator/commands", String, self.on_command, queue_size = 1)
         self._command_sub = rospy.Subscriber("/panda_ik/output", Float64MultiArray, self.on_joints, queue_size = 1)
         self._cart_vel_pub = rospy.Publisher("/simulator/cart_vel", Twist, queue_size=5)
-        self._cart_vel_cam_pub = rospy.Publisher("/drone/vel", Twist, queue_size=5)
+        self._cart_vel_cam_pub = rospy.Publisher("/tello/vel", Twist, queue_size=5)
         
 
     def on_joints(self, msg):
@@ -86,7 +86,7 @@ class Simulator(object):
             joint = JointState()
             joint.header.stamp = rospy.Time.now()
             joint.name = ["panda_joint1", "panda_joint2","panda_joint3","panda_joint4","panda_joint5","panda_joint6","panda_joint7","panda_finger_joint1","panda_finger_joint2"]
-            self._current_joint = [s+self.clamp((d-s),.005) for s,d in zip(self._current_joint,self._desired_joint_pose)]
+            self._current_joint = self._desired_joint_pose #[s+self.clamp((d-s),.005) for s,d in zip(self._current_joint,self._desired_joint_pose)]
             joint.position = self._current_joint
             self._viz_pub.publish(joint)
             return    
