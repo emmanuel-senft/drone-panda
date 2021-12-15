@@ -16,10 +16,13 @@
         <param name="transform" type="string" value="drone_camera" />
     </node>
 
-        <node pkg="drone_panda" type="static_publisher" name="link_static_publisher">
+    <node pkg="drone_panda" type="static_publisher" name="link_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="link" />
     </node>
+    
+    <!-- <node pkg="drone_panda" type="fd" name="fd"/>-->
+    <!-- <node pkg="drone_panda" type="fd_converter" name="fd_converter"/>-->
 
     <node pkg="drone_panda" type="simulator" name="simulator" output="screen">
         <param name="use_relaxed_ik" type="bool" value="false" />

@@ -22,6 +22,8 @@ find_package(OpenCV REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 
+find_library(DHDC libdhd.so.3.8.0)
+
 message(STATUS "OpenCV version: ${OpenCV_VERSION}")
 if(2.9.0 VERSION_GREATER ${OpenCV_VERSION})
     message(FATAL "OpenCV3 required!")
@@ -62,6 +64,15 @@ set(LIBS
     ${OpenCV_LIBRARIES}
     )
 
+if(DHDC)
+  add_executable(fd src/ForceDimension.cpp)
+  target_include_directories(fd PUBLIC adept${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} {CMAKE_CURRENT_SOURCE_DIR}/include /home/senft/catkin_ws/devel/include)
+  target_link_libraries(fd
+     ${catkin_LIBRARIES}
+     ${DHDC}
+  )
+endif()
+
 #############
 ## Install ##
 #############
@@ -97,4 +108,9 @@ catkin_install_python(PROGRAMS
     nodes/tello_driver
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+if(DHDC)
+  install(TARGETS fd
+    RUNTIME DESTINATION lib/fd
+  )
+endif()
 
