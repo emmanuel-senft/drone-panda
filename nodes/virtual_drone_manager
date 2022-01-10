@@ -30,22 +30,23 @@ class VirtualDrone(object):
         self._info_pub = rospy.Publisher("/virtual_camera/camera_info",CameraInfo,queue_size=1,latch=True)
         info = CameraInfo()
         info.header.frame_id = "camera1"
-        info.height = 480
-        info.width = 640
-        info.distortion_model = 'plumb_bob'
-        info.D = [0]
-        info.K = [500.0, 0.0, 320, 0.0, 500.0, 240.0, 0.0, 0.0, 1.0]
-        info.R = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
-        info.P =  [500.0, 0.0, 320, 0.0, 0.0, 500, 240, 0.0, 0.0, 0.0, 1.0, 0.0]
-        info.roi.do_rectify = False 
-        self._info_low_res = copy.deepcopy(info)
-        info.height = 1536
-        info.width = 2048
+        #info.height = 1536
+        #info.width = 2048
+        #fx = 976.9754638671875
+        #fy = 976.9026489257812
+        #cx = 1018.8711547851562
+        #cy = 780.8445434570312
+        info.height = 720
+        info.width = 1280
+        fx = 1000
+        fy = fx
+        cx = 640
+        cy = 360
         info.distortion_model = 'rational_polynomial'
         info.D = [0.5248579382896423, -2.5943498611450195, 0.0008818571805022657, -0.000306136003928259, 1.4509135484695435, 0.4030783474445343, -2.42022705078125, 1.3811763525009155]
-        info.K = [976.9754638671875, 0.0, 1018.8711547851562, 0.0, 976.9026489257812, 780.8445434570312, 0.0, 0.0, 1.0]
+        info.K = [fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0]
         info.R = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
-        info.P =  [976.9754638671875, 0.0, 1018.8711547851562, 0.0, 0.0, 976.9026489257812, 780.8445434570312, 0.0, 0.0, 0.0, 1.0, 0.0]
+        info.P =  [fx, 0.0, cx, 0.0, 0.0, fy, cy, 0.0, 0.0, 0.0, 1.0, 0.0]
         info.roi.do_rectify = False 
         self._info_high_res = copy.deepcopy(info)
         self._info_pub.publish(self._info_high_res)
