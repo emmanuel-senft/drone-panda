@@ -1,0 +1,114 @@
+#!/usr/bin/env python
+from typing import Callable
+import rospy
+from geometry_msgs.msg import Twist, PoseStamped
+import tf2_geometry_msgs
+import tf
+from tf.transformations import *
+import tf2_ros
+import signal
+import sys
+import PyKDL
+from scipy.spatial.transform import Rotation
+
+REFERENCE_FRAME='panda_link0'
+CAMERA_FRAME='drone'
+SIM_EE_FRAME='sim_panda_gripper'
+EE_FRAME='panda_EE'
+
+class SpaceMouseDriver(object):
+    def __init__(self):
+        self._br = tf2_ros.TransformBroadcaster()
+        self._tfBuffer = tf2_ros.Buffer()
+        self._tl = tf2_ros.TransformListener(self._tfBuffer)
+        rospy.sleep(1.5)
+
+        self._k = 270
+        print(rospy.get_param('~only_virtual'))
+        ee_frame = EE_FRAME if rospy.get_param('~only_virtual') == False else SIM_EE_FRAME
+        t = self._tfBuffer.lookup_transform(REFERENCE_FRAME,ee_frame, rospy.Time(0))
+        self._commanded_pose = PoseStamped()
+        self._commanded_pose.header.frame_id = REFERENCE_FRAME
+        self._commanded_pose.pose.position.x=t.transform.translation.x
+        self._commanded_pose.pose.position.y=t.transform.translation.y
+        self._commanded_pose.pose.position.z=t.transform.translation.z
+        self._commanded_pose.pose.orientation.x=t.transform.rotation.x
+        self._commanded_pose.pose.orientation.y=t.transform.rotation.y
+        self._commanded_pose.pose.orientation.z=t.transform.rotation.z
+        self._commanded_pose.pose.orientation.w=t.transform.rotation.w
+
+        self._pose_pub = rospy.Publisher('/panda_ik/input', PoseStamped, queue_size=1)
+        self._twist_sub = rospy.Subscriber("/spacenav/twist", Twist, self.on_twist)
+            
+    def on_twist(self, msg):
+        self._commanded_pose.header.stamp = rospy.Time(0)
+        init_p = self._tfBuffer.transform(self._commanded_pose,CAMERA_FRAME)
+        r1 = Rotation.from_quat([init_p.pose.orientation.x,init_p.pose.orientation.y,init_p.pose.orientation.z,init_p.pose.orientation.w])
+        r2 = Rotation.from_euler("xyz",[msg.angular.x/self._k,msg.angular.y/self._k,msg.angular.z/self._k])
+        r = (r2*r1).as_quat()
+        #rpy = PyKDL.Rotation.Quaternion(init_p.pose.orientation.x,init_p.pose.orientation.y,init_p.pose.orientation.z,init_p.pose.orientation.w).GetRPY()
+        #r=rpy[0]+msg.angular.x/self._k
+        #p=rpy[1]+msg.angular.y/self._k
+        #y=rpy[2]+msg.angular.z/self._k
+        #q = PyKDL.Rotation.RPY(r,p,y).GetQuaternion()
+        pose=PoseStamped()
+        pose.header.stamp = rospy.Time(0)
+        pose.header.frame_id = CAMERA_FRAME
+        pose.pose.position.x = init_p.pose.position.x + msg.linear.x/self._k
+        pose.pose.position.y = init_p.pose.position.y + msg.linear.y/self._k
+        pose.pose.position.z = init_p.pose.position.z + msg.linear.z/self._k
+        pose.pose.orientation.x = r[0]
+        pose.pose.orientation.y = r[1]
+        pose.pose.orientation.z = r[2]
+        pose.pose.orientation.w = r[3]
+        pose.header = init_p.header
+        pose=self._tfBuffer.transform(pose, REFERENCE_FRAME)
+        pose.header.frame_id="panda_gripper_joint"
+        pose.header.stamp = rospy.Time.now()
+        self._pose_pub.publish(pose)
+        pose.header.frame_id = REFERENCE_FRAME
+        self._commanded_pose = pose
+
+
+        #t=rospy.Time.now()
+        #motion = self._tfBuffer.get_transform(REFERENCE_FRAME,CAMERA_FRAME)
+        #motion.header.frame_id = CAMERA_FRAME
+        #motion.pose.position.x += msg.linear.x/self._k
+        #motion.pose.position.y += msg.linear.y/self._k
+        #motion.pose.position.z += msg.linear.z/self._k
+        #
+        #r1 = Rotation.from_quat([motion.pose.orientation.x,motion.pose.orientation.y,motion.pose.orientation.z,motion.pose.orientation.w])
+        #r2 = Rotation.from_euler("xyz",[msg.angular.x/self._k,msg.angular.y/self._k,msg.angular.z/self._k])
+        #r = (r2*r1).as_quat()
+        #motion.pose.orientation.x = r[0]
+        #motion.pose.orientation.y = r[1]
+        #motion.pose.orientation.z = r[2]
+        #motion.pose.orientation.w = r[3]
+#
+        #motion = self._tfBuffer.transform(motion,REFERENCE_FRAME)
+        #self._commanded_pose.pose.position.x += motion.pose.position.x
+        #self._commanded_pose.pose.position.y += motion.pose.position.y
+        #self._commanded_pose.pose.position.z += motion.pose.position.z
+#
+        #r1 = Rotation.from_quat([self._commanded_pose.pose.orientation.x,self._commanded_pose.pose.orientation.y,self._commanded_pose.pose.orientation.z,self._commanded_pose.pose.orientation.w])
+        #r2 = Rotation.from_quat([motion.pose.orientation.x,motion.pose.orientation.y,motion.pose.orientation.z,motion.pose.orientation.w])
+        #r = (r2*r1).as_quat()
+#
+        #self._commanded_pose.pose.orientation.x = r[0]
+        #self._commanded_pose.pose.orientation.y = r[1]
+        #self._commanded_pose.pose.orientation.z = r[2]
+        #self._commanded_pose.pose.orientation.w = r[3]
+#
+        #self._pose_pub.publish(self._commanded_pose)
+    
+    def run(self):
+        rospy.spin()
+
+    def signal_handler(self, signal, frame):
+        sys.exit()
+
+if __name__ == "__main__":
+    rospy.init_node('spacemouse_driver')
+    mouse_driver = SpaceMouseDriver()
+    signal.signal(signal.SIGINT, mouse_driver.signal_handler)
+    mouse_driver.run()

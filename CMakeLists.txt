@@ -106,6 +106,7 @@ catkin_install_python(PROGRAMS
     nodes/rviz_manager
     nodes/drone_controller
     nodes/tello_driver
+    nodes/spacemouse_driver
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(DHDC)

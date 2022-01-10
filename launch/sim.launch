@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="only_virtual" default="true"/>
+
     <node pkg="drone_panda" type="static_publisher" name="camera_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="static_cloud_transform" />
@@ -20,9 +22,6 @@
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="link" />
     </node>
-    
-    <!-- <node pkg="drone_panda" type="fd" name="fd"/>-->
-    <!-- <node pkg="drone_panda" type="fd_converter" name="fd_converter"/>-->
 
     <node pkg="drone_panda" type="simulator" name="simulator" output="screen">
         <param name="use_relaxed_ik" type="bool" value="false" />
@@ -37,6 +36,10 @@
     <node name="compress_virtual" pkg="image_transport" type="republish" args="raw in:=/rviz1/camera1/image compressed out:=/virtual_camera/image_repub">
     </node>
         
+    <node pkg="drone_panda" type="spacemouse_driver" name="spacemouse_driver" output="screen">
+        <param name="only_virtual" type="bool" value="$(arg only_virtual)" />
+    </node>
+
     <!-- startup rviz -->
     <node pkg="drone_panda" type="rviz_manager" name="rviz_manager">
         <param name="only_virtual" value="true" />
