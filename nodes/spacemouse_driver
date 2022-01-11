@@ -2,6 +2,7 @@
 from typing import Callable
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped
+from nav_msgs.msg import Odometry
 import tf2_geometry_msgs
 import tf
 from tf.transformations import *
@@ -37,20 +38,23 @@ class SpaceMouseDriver(object):
         self._commanded_pose.pose.orientation.z=t.transform.rotation.z
         self._commanded_pose.pose.orientation.w=t.transform.rotation.w
 
-        self._pose_pub = rospy.Publisher('/panda_ik/input', PoseStamped, queue_size=1)
+        self._goal_pub = rospy.Publisher('/panda_ik/input', Odometry, queue_size=1)
         self._twist_sub = rospy.Subscriber("/spacenav/twist", Twist, self.on_twist)
             
     def on_twist(self, msg):
         self._commanded_pose.header.stamp = rospy.Time(0)
+
         init_p = self._tfBuffer.transform(self._commanded_pose,CAMERA_FRAME)
         r1 = Rotation.from_quat([init_p.pose.orientation.x,init_p.pose.orientation.y,init_p.pose.orientation.z,init_p.pose.orientation.w])
         r2 = Rotation.from_euler("xyz",[msg.angular.x/self._k,msg.angular.y/self._k,msg.angular.z/self._k])
         r = (r2*r1).as_quat()
+
         #rpy = PyKDL.Rotation.Quaternion(init_p.pose.orientation.x,init_p.pose.orientation.y,init_p.pose.orientation.z,init_p.pose.orientation.w).GetRPY()
         #r=rpy[0]+msg.angular.x/self._k
         #p=rpy[1]+msg.angular.y/self._k
         #y=rpy[2]+msg.angular.z/self._k
         #q = PyKDL.Rotation.RPY(r,p,y).GetQuaternion()
+        
         pose=PoseStamped()
         pose.header.stamp = rospy.Time(0)
         pose.header.frame_id = CAMERA_FRAME
@@ -63,10 +67,19 @@ class SpaceMouseDriver(object):
         pose.pose.orientation.w = r[3]
         pose.header = init_p.header
         pose=self._tfBuffer.transform(pose, REFERENCE_FRAME)
-        pose.header.frame_id="panda_gripper_joint"
-        pose.header.stamp = rospy.Time.now()
-        self._pose_pub.publish(pose)
-        pose.header.frame_id = REFERENCE_FRAME
+
+        new_twist = Twist()
+        new_twist.linear.x = (pose.pose.position.x - self._commanded_pose.pose.position.x)*self._k
+        new_twist.linear.y = (pose.pose.position.y - self._commanded_pose.pose.position.y)*self._k
+        new_twist.linear.z = (pose.pose.position.z - self._commanded_pose.pose.position.z)*self._k
+
+        goal=Odometry()
+        goal.child_frame_id="panda_gripper_joint"
+        goal.header.stamp = rospy.Time.now()
+        goal.header.frame_id = REFERENCE_FRAME
+        goal.pose.pose = pose.pose
+        goal.twist.twist= new_twist
+        self._goal_pub.publish(goal)
         self._commanded_pose = pose
 
 
