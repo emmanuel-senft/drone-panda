@@ -13,9 +13,13 @@ Panels:
         - /Path1
         - /PoseArray1
         - /CameraPub1
+        - /CameraPub1/Visibility1
         - /PointCloud21
         - /Marker2
-        - /Pose1
+        - /Odometry1
+        - /Odometry1/Shape1
+        - /Light1
+        - /Light1/Direction1
       Splitter Ratio: 0.5289514660835266
     Tree Height: 648
   - Class: rviz/Selection
@@ -317,11 +321,13 @@ Visualization Manager:
         Grid: true
         Image: true
         InteractiveMarkers: true
+        Light: true
         Marker: true
+        Odometry: true
         Path: true
         PointCloud2: true
-        Pose: true
-        PoseArray: true
+        Pose: false
+        PoseArray: false
         RobotModel: true
         TF: true
         Value: true
@@ -374,20 +380,73 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Alpha: 1
-      Axes Length: 0.10000000149011612
-      Axes Radius: 0.009999999776482582
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
       Class: rviz/Pose
       Color: 255; 25; 0
       Enabled: true
       Head Length: 0.10000000149011612
-      Head Radius: 0.10000000149011612
+      Head Radius: 0.019999999552965164
       Name: Pose
       Queue Size: 10
       Shaft Length: 0.10000000149011612
       Shaft Radius: 0.009999999776482582
-      Shape: Axes
+      Shape: Arrow
+      Topic: /panda_ik/drone_output
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.009999999776482582
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 1
+      Name: Odometry
+      Position Tolerance: 0.0010000000474974513
+      Queue Size: 1
+      Shape:
+        Alpha: 1
+        Axes Length: 0.05000000074505806
+        Axes Radius: 0.009999999776482582
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 1
+        Shaft Radius: 0.05000000074505806
+        Value: Axes
       Topic: /panda_ik/input
       Unreliable: false
+      Value: true
+    - Class: rviz_lighting/Light
+      Diffuse Color: 255; 255; 255
+      Direction:
+        X: 1
+        Y: 1
+        Z: 1
+      Enabled: true
+      Falloff: 1
+      Light Type: Directional
+      Name: Light
+      Outer Angle: 0.5
+      Position:
+        X: 0
+        Y: 0
+        Z: 0
+      Reference Frame: camera1
+      Specular Color: 255; 255; 255
       Value: true
   Enabled: true
   Global Options:
@@ -417,7 +476,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.7828030586242676
+      Distance: 3.246549129486084
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -425,17 +484,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.36201903223991394
-        Y: 0.2231857031583786
-        Z: 0.3949210047721863
+        X: 0.4507485330104828
+        Y: 0.1236252710223198
+        Z: 0.3346238136291504
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.06479725986719131
+      Pitch: 0.5497972965240479
       Target Frame: <Fixed Frame>
-      Yaw: 5.115762710571289
+      Yaw: 4.970757484436035
     Saved: ~
 Window Geometry:
   Displays:

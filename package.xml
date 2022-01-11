@@ -49,6 +49,7 @@
   <run_depend>rviz_camera_stream</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>rviz_lighting</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <!--<export>
