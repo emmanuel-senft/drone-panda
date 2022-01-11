@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="only_virtual" default="false"/>
+
+
     <node pkg="drone_panda" type="static_publisher" name="camera_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="static_cloud_transform" />
@@ -44,6 +47,10 @@
     <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">
         <remap from="/panda_ik/output" to="/JointController/panda/joint_command"/>
         <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda_arm_hand.urdf" />
+    </node>
+
+    <node pkg="drone_panda" type="spacemouse_driver" name="spacemouse_driver" output="screen">
+        <param name="only_virtual" type="bool" value="$(arg only_virtual)" />
     </node>
 
    <node pkg="drone_panda" type="virtual_drone_manager" name="virtual_camera_manager" output="screen"/> 
