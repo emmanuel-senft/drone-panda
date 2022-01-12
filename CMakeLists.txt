@@ -106,7 +106,7 @@ catkin_install_python(PROGRAMS
     nodes/rviz_manager
     nodes/drone_controller
     nodes/tello_driver
-    nodes/spacemouse_driver
+    nodes/velocity_controller
     nodes/joy_driver
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

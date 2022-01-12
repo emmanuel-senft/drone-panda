@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="only_virtual" default="false"/>
-
+    <arg name="virtual_robot" default="true"/>
+    <arg name="virtual_drone" default="true"/>
+    <arg name="use_joy" default="true"/>
+    <arg name="use_space_mouse" default="false"/>
 
     <node pkg="drone_panda" type="static_publisher" name="camera_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
@@ -19,9 +21,9 @@
         <param name="transform" type="string" value="drone_camera" />
     </node>
 
-    <node pkg="drone_panda" type="static_publisher" name="mocap_camera_static_publisher">
+    <node pkg="drone_panda" type="static_publisher" name="sim_ee_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
-        <param name="transform" type="string" value="mocap" />
+        <param name="transform" type="string" value="sim_ee_transform" />
     </node>
 
     <node pkg="drone_panda" type="simulator" name="simulator" output="screen">
@@ -33,30 +35,57 @@
         
     <!-- startup rviz -->
     <node pkg="drone_panda" type="rviz_manager" name="rviz_manager">
-        <param name="only_virtual" value="true" />
     </node>
 
-    <include file="$(find drone_panda)/launch/mocap.launch">  
-    </include>
-
-    <node pkg="drone_panda" type="static_publisher" name="sim_ee_static_publisher">
-        <param name="file_name" type="string" value="transforms.yaml" />
-        <param name="transform" type="string" value="sim_ee_transform" />
-    </node>
-    
-    <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">
-        <remap from="/panda_ik/output" to="/JointController/panda/joint_command"/>
-        <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda_arm_hand.urdf" />
-    </node>
-
-    <node pkg="drone_panda" type="spacemouse_driver" name="spacemouse_driver" output="screen">
-        <param name="only_virtual" type="bool" value="$(arg only_virtual)" />
+    <node pkg="drone_panda" type="velocity_controller" name="velocity_controller" output="screen">
     </node>
 
    <node pkg="drone_panda" type="virtual_drone_manager" name="virtual_camera_manager" output="screen"/> 
-    <!-- <node name="uncompress_client" pkg="image_transport" type="republish" args="compressed in:=/client/camera/image_raw raw out:=/client/camera/image_raw">
-    </node> -->
+
     <node name="compress_virtual" pkg="image_transport" type="republish" args="raw in:=/rviz1/camera1/image compressed out:=/virtual_camera/image_repub">
     </node>
-    
+
+
+    <group if="$(arg virtual_robot)">
+	    <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">
+            <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda_arm_hand.urdf" />
+	    </node>
+        <include file="$(find drone_panda)/launch/joint_state_pub.launch">  
+            <arg name="only_virtual" value="true" />
+        </include>
+	</group>
+
+    <group unless="$(arg virtual_robot)">
+	    <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">
+            <remap from="/panda_ik/output" to="/JointController/panda/joint_command"/>
+		    <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda_arm_hand.urdf" />
+	    </node>
+	</group>
+
+    <group if="$(arg use_joy)">
+    	<include file="$(find teleop_twist_joy)/launch/teleop.launch">  
+    	</include>
+        <node pkg="drone_panda" type="joy_driver" name="joy_driver" output="screen">
+        	<param name="virtual_robot" type="bool" value="$(arg virtual_robot)" />
+	    </node>
+    </group>
+
+    <group if="$(arg virtual_drone)">
+
+    </group>
+
+    <group unless="$(arg virtual_drone)">
+	    <include file="$(find drone_panda)/launch/mocap.launch">  
+	    </include>
+
+	    <node pkg="drone_panda" type="static_publisher" name="mocap_camera_static_publisher">
+            <param name="file_name" type="string" value="transforms.yaml" />
+    		<param name="transform" type="string" value="mocap" />
+	    </node>
+
+	    <node pkg="drone_panda" type="tello_driver" name="tello_driver" output="screen">
+	    </node>
+
+    </group>
+
 </launch>

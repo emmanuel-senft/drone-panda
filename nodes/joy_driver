@@ -13,7 +13,8 @@ import numpy as np
 
 class JoyDriver(object):
     def __init__(self):
-        self._twist_pub = rospy.Publisher("/spacenav/twist", Twist, queue_size=1)
+        self._virtual_robot = rospy.get_param('~virtual_robot',True)
+        self._twist_pub = rospy.Publisher("/commanded_vel", Twist, queue_size=1)
         self._joy_sub = rospy.Subscriber('/joy', Joy, self.on_joy)
             
     def on_joy(self, msg):

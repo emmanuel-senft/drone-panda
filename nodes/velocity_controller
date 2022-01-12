@@ -2,7 +2,6 @@
 from typing import Callable
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped, TwistStamped
-from nav_msgs.msg import Odometry
 import tf2_geometry_msgs
 import tf
 from tf.transformations import *
@@ -14,8 +13,6 @@ from scipy.spatial.transform import Rotation
 
 REFERENCE_FRAME='panda_link0'
 CAMERA_FRAME='drone'
-SIM_EE_FRAME='sim_panda_gripper'
-EE_FRAME='panda_EE'
 
 class SpaceMouseDriver(object):
     def __init__(self):
@@ -25,7 +22,7 @@ class SpaceMouseDriver(object):
         rospy.sleep(1.5)
 
         self._goal_pub = rospy.Publisher('/panda_ik/input', TwistStamped, queue_size=1)
-        self._twist_sub = rospy.Subscriber("/spacenav/twist", Twist, self.on_twist)
+        self._twist_sub = rospy.Subscriber("/commanded_vel", Twist, self.on_twist)
             
     def on_twist(self, msg):
         camera_t = self._tfBuffer.lookup_transform(REFERENCE_FRAME,CAMERA_FRAME,rospy.Time(0))
