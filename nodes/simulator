@@ -143,6 +143,20 @@ class Simulator(object):
             self._current_joint[-2] = self._finger_val
             rospy.sleep(.5)
             self._event_pub.publish("release_finished")
+        
+        if msg.data == "toggle_gripper":
+            if self._finger_val < 0.01:
+                self._finger_val = .035
+                self._current_joint[-1] = self._finger_val
+                self._current_joint[-2] = self._finger_val
+                rospy.sleep(.5)
+                self._event_pub.publish("release_finished")
+            else:
+                self._finger_val = 0.0
+                self._current_joint[-1] = self._finger_val
+                self._current_joint[-2] = self._finger_val
+                rospy.sleep(.5)
+                self._event_pub.publish("grasp_finished")
 
     def on_state(self, msg):
         self._init = True

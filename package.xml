@@ -50,6 +50,7 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>rviz_lighting</run_depend>
+  <run_depend>franka_gripper</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <!--<export>

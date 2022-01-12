@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 from typing import Callable
 import rospy
+import actionlib
+import control_msgs.msg 
 from geometry_msgs.msg import Twist, PoseStamped
+import franka_gripper.msg
 from sensor_msgs.msg import Joy
+from std_msgs.msg import String
 import tf2_geometry_msgs
 import tf
 from tf.transformations import *
@@ -15,7 +19,13 @@ class JoyDriver(object):
     def __init__(self):
         self._virtual_robot = rospy.get_param('~virtual_robot',True)
         self._twist_pub = rospy.Publisher("/commanded_vel", Twist, queue_size=1)
+        if self._virtual_robot:
+            self._command_pub = rospy.Publisher("/simulator/commands", String, queue_size=1)
+        else:
+            self._grasp_client = actionlib.SimpleActionClient('/franka_gripper/gripper_action', control_msgs.msg.GripperCommandAction)
         self._joy_sub = rospy.Subscriber('/joy', Joy, self.on_joy)
+        self._a_pressed = False
+        self._grasped = False
             
     def on_joy(self, msg):
         ax = msg.axes
@@ -30,6 +40,29 @@ class JoyDriver(object):
         if msg.buttons[5]:
             t.angular.z = 2*np.pi
         self._twist_pub.publish(t)
+
+        if msg.buttons[0] and not self._a_pressed:
+            self._a_pressed = True
+            if self._virtual_robot:
+                self._command_pub.publish("toggle_gripper")
+            else:
+                if not self._grasped:
+                    goal = control_msgs.msg.GripperCommandGoal()
+                    goal.command.position = 0
+                    goal.command.max_effort = 20
+                    self._grasp_client.send_goal(goal)
+                    self._grasp_client.wait_for_server()
+                else:
+                    goal = control_msgs.msg.GripperCommandGoal()
+                    goal.command.position = 0.036
+                    goal.command.max_effort = 10
+                    self._grasp_client.send_goal(goal)
+                    self._grasp_client.wait_for_server()
+
+                self._grasped = not self._grasped
+        
+        if not msg.buttons[0] and self._a_pressed:
+            self._a_pressed = False
     
     def run(self):
         rospy.spin()
