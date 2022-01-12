@@ -21,6 +21,8 @@ class TelloDriver(object):
         self._tl = tf2_ros.TransformListener(self._tfBuffer)
         rospy.sleep(.5)
 
+        self._tookoff = False
+
         self._image_pub = rospy.Publisher("/tello/image",Image, queue_size=1)
         self._battery_pub = rospy.Publisher("/tello/battery", Int16, queue_size=1)
         
@@ -38,10 +40,14 @@ class TelloDriver(object):
     def on_command(self, msg):
         if msg.data == "takeoff":
             self._tello.takeoff()
+            self._tookoff = True
         if msg.data == "land":
             self._tello.land()
+            self._tookoff = False
 
     def on_twist(self, msg):
+        if not self._tookoff:
+            return
         self._twist = msg
         self.set_vel()
     
