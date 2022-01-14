@@ -14,7 +14,7 @@ from scipy.spatial.transform import Rotation
 REFERENCE_FRAME='panda_link0'
 CAMERA_FRAME='drone'
 
-class SpaceMouseDriver(object):
+class VelocityController(object):
     def __init__(self):
         self._br = tf2_ros.TransformBroadcaster()
         self._tfBuffer = tf2_ros.Buffer()
@@ -33,7 +33,8 @@ class SpaceMouseDriver(object):
         t[3]=msg.angular.x
         t[4]=msg.angular.y
         t[5]=msg.angular.z
-        R=PyKDL.Rotation.Quaternion(camera_t.transform.rotation.x,camera_t.transform.rotation.y,camera_t.transform.rotation.z,camera_t.transform.rotation.w)
+        rpy=PyKDL.Rotation.Quaternion(camera_t.transform.rotation.x,camera_t.transform.rotation.y,camera_t.transform.rotation.z,camera_t.transform.rotation.w).GetRPY()
+        R=PyKDL.Rotation.RPY(0,0,rpy[2])
         t=R*t
 
         twist = TwistStamped()
@@ -55,7 +56,7 @@ class SpaceMouseDriver(object):
         sys.exit()
 
 if __name__ == "__main__":
-    rospy.init_node('spacemouse_driver')
-    mouse_driver = SpaceMouseDriver()
-    signal.signal(signal.SIGINT, mouse_driver.signal_handler)
-    mouse_driver.run()
+    rospy.init_node('velocity_controller')
+    vel_controller = VelocityController()
+    signal.signal(signal.SIGINT, vel_controller.signal_handler)
+    vel_controller.run()
