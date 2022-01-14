@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="virtual_robot" default="true"/>
+    <arg name="virtual_robot" default="false"/>
     <arg name="virtual_drone" default="true"/>
 
     <include file="$(find drone_panda)/launch/all.launch">  
