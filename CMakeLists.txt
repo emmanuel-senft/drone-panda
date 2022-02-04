@@ -108,6 +108,7 @@ catkin_install_python(PROGRAMS
     nodes/tello_driver
     nodes/velocity_controller
     nodes/joy_driver
+    nodes/spacemouse_driver
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(DHDC)

@@ -70,6 +70,13 @@
 	    </node>
     </group>
 
+    <group if="$(arg use_space_mouse)">
+    	<include file="$(find spacenav_node)/launch/classic.launch"/>
+        <node pkg="drone_panda" type="spacemouse_driver" name="spacemouse_driver" output="screen">
+        	<param name="virtual_robot" type="bool" value="$(arg virtual_robot)" />
+	    </node>
+    </group>
+
     <group if="$(arg virtual_drone)">
 
     </group>
