@@ -16,7 +16,6 @@ import subprocess32
 class EnvMapping:
     def __init__(self):
         rospy.init_node('env_mapping')
-        now = datetime.now()
         self._p = None
 
         # Subscribe to start/stop mapping
@@ -27,9 +26,9 @@ class EnvMapping:
 
     def mappingToggle(self,data):
         if data.data == "on":
-            startMapping()
+            self.startMapping()
         elif data.data == "off":
-            stopMapping()
+            self.stopMapping()
 
     def startMapping(self):
         if not self._p is None:

@@ -27,15 +27,13 @@ def main():
     odom.child_frame_id = 'panda_link0'
     
     rate = rospy.Rate(30.0)
-    prev_z = 0.5
     while not rospy.is_shutdown():
         try:
-            trans = tfBuffer.lookup_transform('panda_link0', 'panda_ee', rospy.Time())
+            trans = tfBuffer.lookup_transform('panda_link0', 'camera_base', rospy.Time())
             odom.header.stamp = rospy.Time.now()
             odom.pose.pose.position.x = trans.transform.translation.x
             odom.pose.pose.position.y = trans.transform.translation.y
             odom.pose.pose.position.z = trans.transform.translation.z
-            prev_z = odom.pose.pose.position.z
             odom.pose.pose.orientation = trans.transform.rotation
             odom_pub.publish(odom)
             trans.child_frame_id = 'rtabmap/panda/odom'
@@ -43,6 +41,7 @@ def main():
             rate.sleep()
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            print("failed lookup")
             rate.sleep()
 if __name__ == "__main__":
     main()
