@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="drone_panda" type="map_odometry" name="map_odometry"/>
+    <node pkg="drone_panda" type="env_mapping" name="env_mapping"/>
+</launch>

@@ -109,6 +109,8 @@ catkin_install_python(PROGRAMS
     nodes/velocity_controller
     nodes/joy_driver
     nodes/spacemouse_driver
+    nodes/map_odometry
+    nodes/env_mapping
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(DHDC)
