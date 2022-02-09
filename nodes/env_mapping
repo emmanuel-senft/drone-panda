@@ -34,7 +34,7 @@ class EnvMapping:
     def startMapping(self):
         if not self._p is None:
             self._p.kill()
-        self._p = subprocess32.Popen(["roslaunch", "Azure_Kinect_ROS_Driver", "mapping_rtabmap.launch"])
+        self._p = subprocess32.Popen(["roslaunch", "drone_panda", "mapping_rtabmap.launch"])
        
     def stopMapping(self):
         if self._p is None:
