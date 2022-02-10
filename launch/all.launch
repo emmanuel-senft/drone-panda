@@ -4,6 +4,7 @@
     <arg name="virtual_drone" default="false"/>
     <arg name="use_joy" default="true"/>
     <arg name="use_space_mouse" default="false"/>
+    <arg name="rvizconfig" default="real.rviz"/>
 
     <node pkg="drone_panda" type="static_publisher" name="camera_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
@@ -35,6 +36,7 @@
         
     <!-- startup rviz -->
     <node pkg="drone_panda" type="rviz_manager" name="rviz_manager">
+        <param name="rvizconfig" type="string" value="$(arg virtual_robot)" />
     </node>
 
     <node pkg="drone_panda" type="velocity_controller" name="velocity_controller" output="screen">
