@@ -6,6 +6,8 @@
     <arg name="use_space_mouse" default="false"/>
     <arg name="rvizconfig" default="real.rviz"/>
 
+    <include file="$(find drone_panda)/launch/kinect_toggler.launch"/>  
+
     <node pkg="drone_panda" type="static_publisher" name="camera_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="static_cloud_transform" />
