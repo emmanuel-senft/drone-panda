@@ -4,6 +4,8 @@ Licensed under the MIT License.
 -->
 
 <launch>
+
+  <arg name="color_enabled" default="true"/> 
   
   <!-- Start rtabmap_ros node -->
   <include file="$(find drone_panda)/launch/rtabmap.launch">

@@ -50,7 +50,7 @@
 
     <group if="$(arg virtual_robot)">
 	    <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">
-            <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda_arm_hand.urdf" />
+            <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda.urdf" />
 	    </node>
         <include file="$(find drone_panda)/launch/joint_state_pub.launch">  
             <arg name="only_virtual" value="true" />
@@ -60,7 +60,7 @@
     <group unless="$(arg virtual_robot)">
 	    <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">
             <remap from="/panda_ik/output" to="/JointController/panda/joint_command"/>
-		    <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda_arm_hand.urdf" />
+		    <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda.urdf" />
 	    </node>
 	</group>
 
