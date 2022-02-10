@@ -18,6 +18,8 @@ import numpy as np
 class JoyDriver(object):
     def __init__(self):
         self._virtual_robot = rospy.get_param('~virtual_robot',True)
+        #self._virtual_drone = rospy.get_param('~virtual_drone')
+
         self._twist_pub = rospy.Publisher("/commanded_vel", Twist, queue_size=1)
         if self._virtual_robot:
             self._command_pub = rospy.Publisher("/simulator/commands", String, queue_size=1)
