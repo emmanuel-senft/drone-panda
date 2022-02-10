@@ -8,11 +8,12 @@ Panels:
         - /TF1/Frames1
         - /TF1/Tree1
         - /CameraPub1/Visibility1
+        - /Drone Camera1
         - /Light1/Direction1
         - /Pose2
         - /PointCloud22
-      Splitter Ratio: 0.5289514660835266
-    Tree Height: 263
+      Splitter Ratio: 0.5278858542442322
+    Tree Height: 276
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -163,10 +164,16 @@ Visualization Manager:
           Value: false
         camera_visor:
           Value: false
+        depth_camera_link:
+          Value: true
         drone:
           Value: true
         ft_sensor_link:
           Value: false
+        imu_link:
+          Value: true
+        map:
+          Value: true
         panda_EE:
           Value: true
         panda_K:
@@ -199,6 +206,10 @@ Visualization Manager:
           Value: false
         panda_rightfinger:
           Value: false
+        rgb_camera_link:
+          Value: true
+        rtabmap/panda/odom:
+          Value: true
         sim_panda_gripper:
           Value: false
         static_camera_link:
@@ -210,38 +221,46 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        panda_link0:
-          drone:
-            camera1:
+        map:
+          panda_link0:
+            drone:
+              camera1:
+                {}
+            panda_link1:
+              panda_link2:
+                panda_link3:
+                  panda_link4:
+                    panda_link5:
+                      panda_link6:
+                        panda_link7:
+                          ft_sensor_link:
+                            panda_link8:
+                              camera_base:
+                                camera_body:
+                                  {}
+                                camera_visor:
+                                  {}
+                                depth_camera_link:
+                                  imu_link:
+                                    {}
+                                  rgb_camera_link:
+                                    {}
+                              panda_NE:
+                                panda_EE:
+                                  panda_K:
+                                    {}
+                              panda_hand:
+                                panda_leftfinger:
+                                  {}
+                                panda_rightfinger:
+                                  {}
+                                sim_panda_gripper:
+                                  panda_gripper:
+                                    {}
+            rtabmap/panda/odom:
               {}
-          panda_link1:
-            panda_link2:
-              panda_link3:
-                panda_link4:
-                  panda_link5:
-                    panda_link6:
-                      panda_link7:
-                        ft_sensor_link:
-                          panda_link8:
-                            camera_base:
-                              camera_body:
-                                {}
-                              camera_visor:
-                                {}
-                            panda_NE:
-                              panda_EE:
-                                panda_K:
-                                  {}
-                            panda_hand:
-                              panda_leftfinger:
-                                {}
-                              panda_rightfinger:
-                                {}
-                              sim_panda_gripper:
-                                panda_gripper:
-                                  {}
-          static_camera_link:
-            {}
+            static_camera_link:
+              {}
       Update Interval: 0
       Value: true
     - Class: rviz/Marker
@@ -265,8 +284,9 @@ Visualization Manager:
       Queue Size: 2
       Value: true
       Visibility:
+        Drone Camera: true
+        End Effector: true
         Grid: true
-        Image: true
         Light: true
         Marker: true
         PointCloud2: true
@@ -308,7 +328,7 @@ Visualization Manager:
       Max Value: 1
       Median window: 5
       Min Value: 0
-      Name: Image
+      Name: Drone Camera
       Normalize Range: true
       Queue Size: 2
       Transport Hint: compressed
@@ -392,9 +412,21 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /k4a/rgb/image_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: End Effector
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 85; 87; 83
     Default Light: true
     Fixed Frame: panda_link0
     Frame Rate: 30
@@ -436,19 +468,21 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3497973680496216
+      Pitch: 0.3247973918914795
       Target Frame: <Fixed Frame>
-      Yaw: 5.180732727050781
+      Yaw: 5.140732288360596
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
+  Drone Camera:
+    collapsed: false
+  End Effector:
+    collapsed: false
   Height: 994
   Hide Left Dock: false
   Hide Right Dock: true
-  Image:
-    collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000030500000388fc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000b2fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000018a000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d006100670065000000010c0000020f0000000000000000fb0000000a0049006d00610067006501000001cd000001f80000001600ffffff000000010000016c0000037cfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000037c000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000032900000058fc0100000002fb0000000800540069006d0065000000000000000329000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000004170000038800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000030500000388fc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000b2fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000003d000001b4000000e60100001cfa000000000100000002fb000000180045006e00640020004500660066006500630074006f00720100000000ffffffff0000008a00fffffffb000000100044006900730070006c0061007900730100000000000003050000015600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d006100670065000000010c0000020f0000000000000000fb0000001800440072006f006e0065002000430061006d00650072006101000001f7000001ce0000001600ffffff000000010000016c0000037cfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000037c000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000032900000058fc0100000002fb0000000800540069006d0065000000000000000329000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000004170000038800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
