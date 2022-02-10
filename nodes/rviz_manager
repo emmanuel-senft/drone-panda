@@ -6,6 +6,7 @@ import signal
 import sys
 import rospy
 from std_msgs.msg import String
+import time
 
 ## Next import all the Qt bindings into the current namespace, for
 ## convenience.  This uses the "python_qt_binding" package which hides
@@ -68,6 +69,7 @@ class MyViz( QWidget ):
         self.setLayout( layout )
         self.robot_model = self.manager.getRootDisplayGroup().getDisplayAt( 1 )
 
+
     def on_event( self, msg ):
         if msg.data == "start_edit":
             self.robot_model.subProp( "Visual Enabled" ).setValue( False )
@@ -83,7 +85,7 @@ if __name__ == '__main__':
 
     rvizconfig = rospy.get_param('~rvizconfig')
 
-    myviz = MyViz()
+    myviz = MyViz(rvizconfig)
     myviz.resize(2000,2000)
     myviz.show()
     #Allow python to capture keyboard interrup

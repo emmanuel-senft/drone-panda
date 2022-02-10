@@ -44,12 +44,12 @@ class EnvMapping:
 
             # TODO: send cloud to plane finder
             
-            saveCloud = False
+            saveCloud = True
             if saveCloud and self.lastcloud is not None:
                 rospack = rospkg.RosPack()
                 path = rospack.get_path('drone_panda')+'/saved_msgs/pc_new.txt'
                 with open(path, 'w') as outfile:
-                    outfile.write(self.lastcloud.serialize())
+                    self.lastcloud.serialize(outfile.buffer)
 
        
 if __name__ == "__main__":
