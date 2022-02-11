@@ -45,6 +45,9 @@
   <build_depend>rviz_camera_stream</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>drone_ros_msgs</build_depend>
+  <build_depend>libpcl-all-dev</build_depend>
+  <run_depend>libpcl-all</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>rviz_camera_stream</run_depend>
   <run_depend>sensor_msgs</run_depend>

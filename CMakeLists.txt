@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(drone_panda)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 SET(CMAKE_CXX_FLAGS  "-O3 -fopenmp")
 
 ## Find catkin macros and libraries
@@ -15,12 +18,21 @@ find_package(catkin REQUIRED COMPONENTS
         image_geometry 
         rviz_camera_stream
         sensor_msgs
+        pcl_conversions
+        pcl_ros
+        drone_ros_msgs
         )
 
 ## System dependencies
 find_package(OpenCV REQUIRED)
 
 find_package(Eigen3 REQUIRED)
+
+find_package(PCL REQUIRED)
+
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 find_library(DHDC libdhd.so.3.8.0)
 
@@ -72,6 +84,9 @@ if(DHDC)
      ${DHDC}
   )
 endif()
+
+add_executable(cloudplane src/PCLPlanes.cpp)
+target_link_libraries(cloudplane ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 #############
 ## Install ##
