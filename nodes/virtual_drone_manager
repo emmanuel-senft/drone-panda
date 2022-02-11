@@ -84,8 +84,6 @@ class VirtualDrone(object):
         self._freq = 100
 
         self._goal = None
-        self._max_v_lin = .1
-        self._max_v_rot = .1
 
         self._br.sendTransform(t)
         self._drone_transform = t

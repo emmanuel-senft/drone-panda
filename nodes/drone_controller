@@ -3,6 +3,7 @@ import numpy as np
 import math
 import rospy
 import PyKDL
+from scipy import signal as scisignal
 import signal
 import sys
 import tf
@@ -41,14 +42,27 @@ class VirtualDrone(object):
         self._freq = 100
 
         self._goal = None
-        self._max_v_lin = .25
-        self._max_v_rot = 1#.4
-        self._k_lin = 2
-        #self._k_rot = .3
-        self._k_rot = 2
+        self._max_v_lin = .1
+        self._max_v_rot = 2
+
+        self._k_lin_h = 2.5
+        self._d_lin_h = 1.5
+        self._k_lin_v = 4
+        self._d_lin_v = 1
+        self._k_rot = 3
+        self._d_rot = 0
+        self._last_errors = np.zeros(4)
+        self._last_d_errors = np.zeros(4)
+        self._last_filtered_d_errors = np.zeros(4)
+        self._b,self._a = scisignal.butter(1,0.001)
         #self._vel_pub = rospy.Publisher("/tello/vel",Twist,queue_size=1,latch=True)
         self._vel_pub = rospy.Publisher("/tello/vel",Twist,queue_size=1,latch=True)
         self._pose_sub = rospy.Subscriber("/panda_ik/drone_output", PoseStamped, self.on_pose)
+
+    def filter(self, last_x,x,last_y):
+        a=self._a
+        b=self._b
+        return (b[0]*x+b[1]*last_x-a[1]*last_y)/a[0]
 
     def on_pose(self, msg):
         self._goal = msg
@@ -57,14 +71,27 @@ class VirtualDrone(object):
     def clamp(self, val, bound):
         return min(bound,max(-bound, val))
 
+    def get_PD(self, e, d_e, k, d, max):
+        command = k*e+d*d_e
+        return self.clamp(command,max)
+
     def publish_drone_vel(self):
         if self._goal is not None:
-            pose = self._tfBuffer.transform(self._goal,"drone")            
-            self._twist.linear.x =  self.clamp(self._k_lin * (pose.pose.position.x),self._max_v_lin)
-            self._twist.linear.y =  self.clamp(self._k_lin * (pose.pose.position.y),self._max_v_lin)
-            self._twist.linear.z =  self.clamp(self._k_lin * (pose.pose.position.z),self._max_v_lin)
+            pose = self._tfBuffer.transform(self._goal,"drone")      
             q_pose = e_q([pose.pose.orientation.x,pose.pose.orientation.y,pose.pose.orientation.z,pose.pose.orientation.w])
-            self._twist.angular.z = self.clamp(self._k_rot * q_pose[2],self._max_v_rot)
+            errors = np.array([pose.pose.position.x,pose.pose.position.y,pose.pose.position.z,q_pose[2]])
+            #print(np.linalg.norm(errors[0:3]))
+            d_errors = (self._last_d_errors-errors)/self._freq
+            filtered_d_errors = np.zeros(4)
+            for i in range(4):
+                filtered_d_errors[i] = self.filter(self._last_d_errors[i],d_errors[i],self._last_filtered_d_errors[i])
+            self._twist.linear.x =  self.get_PD(errors[0],filtered_d_errors[0],self._k_lin_h,self._d_lin_h,self._max_v_lin)
+            self._twist.linear.y =  self.get_PD(errors[1],filtered_d_errors[1],self._k_lin_h,self._d_lin_h,self._max_v_lin)
+            self._twist.linear.z =  self.get_PD(errors[2],filtered_d_errors[2],self._k_lin_v,self._d_lin_v,self._max_v_lin)
+            self._twist.angular.z = self.get_PD(errors[3],filtered_d_errors[3],self._k_rot,self._d_rot,self._max_v_rot)
+            self._last_errors = errors
+            self._last_d_errors = d_errors
+            self._last_filtered_d_errors = filtered_d_errors
         else:
             self._twist = Twist()
 
