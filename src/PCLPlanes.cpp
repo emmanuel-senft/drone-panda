@@ -19,6 +19,7 @@
 
 // Export to custom message type
 #include "drone_ros_msgs/PlanesInliers.h"
+#include "drone_ros_msgs/PlanesInliersArr.h"
 
 ros::Publisher planepub;
 
@@ -48,6 +49,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
 
   // Create the filtering object
   pcl::ExtractIndices<pcl::PointXYZ> extract;
+  drone_ros_msgs::PlanesInliersArr planes;
 
   int ii = 0, nr_points = (int) cloud->size ();
   // While 30% of the original cloud is still there
@@ -67,12 +69,12 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     extract.setIndices (inliers);
     extract.setNegative (false);
     extract.filter (*cloud_p);
-    std::cout << "Plane " << ii << ": " << cloud_p->width * cloud_p->height << " data points." << std::endl;
-    std::cerr << "Model coefficients: " << coefficients->values[0] << " " 
-                                        << coefficients->values[1] << " "
-                                        << coefficients->values[2] << " " 
-                                        << coefficients->values[3] << std::endl;
-    std::cerr << "Model inliers: " << inliers->indices.size () << std::endl;
+    // std::cout << "Plane " << ii << ": " << cloud_p->width * cloud_p->height << " data points." << std::endl;
+    // std::cerr << "Model coefficients: " << coefficients->values[0] << " " 
+    //                                     << coefficients->values[1] << " "
+    //                                     << coefficients->values[2] << " " 
+    //                                     << coefficients->values[3] << std::endl;
+    // std::cerr << "Model inliers: " << inliers->indices.size () << std::endl;
 
     // Send result out on custom topic
     drone_ros_msgs::PlanesInliers tempplane;
@@ -89,7 +91,8 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     }
 
     // Publish the data.
-    planepub.publish (tempplane);
+    planes.planes.push_back(tempplane);
+    
 
     // Create the filtering object
     extract.setNegative (true);
@@ -97,6 +100,8 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     cloud.swap (cloud_f);
     ii++;
   }
+
+  planepub.publish(planes);
 
 }
 
@@ -110,7 +115,7 @@ int main (int argc, char** argv)
   ros::Subscriber sub = nh.subscribe ("/filtered_cloud", 1, cloud_cb);
 
   // Create a ROS publisher for the output point cloud
-  planepub = nh.advertise<drone_ros_msgs::PlanesInliers> ("/pclplanes", 1);
+  planepub = nh.advertise<drone_ros_msgs::PlanesInliersArr> ("/pclplanes", 1);
 
   // Spin
   ros::spin ();

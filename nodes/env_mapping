@@ -19,6 +19,8 @@ class EnvMapping:
         rospy.init_node('env_mapping')
         self._p = None
         self.lastcloud = None
+        self.pub = rospy.Publisher("/filtered_cloud",PointCloud2, queue_size =1, latch = True)
+        time.sleep(0.5)
 
         # Subscribe to start/stop mapping
         rospy.Subscriber("mappingToggle", String, self.mappingToggle)
@@ -40,9 +42,9 @@ class EnvMapping:
        
     def stopMapping(self):
         if self._p is not None:
-            self._p.terminate()
-            # TODO: send cloud to plane finder
-            
+            self._p.terminate()  
+        if self.lastcloud:
+            self.pub(self.lastcloud)
             
 
        

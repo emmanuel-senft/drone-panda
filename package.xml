@@ -47,6 +47,12 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>drone_ros_msgs</build_depend>
   <build_depend>libpcl-all-dev</build_depend>
+  <build_depend>qtbase5-dev</build_depend>
+  <build_depend>rviz</build_depend>
+  <run_depend>libqt5-core</run_depend>
+  <run_depend>libqt5-gui</run_depend>
+  <run_depend>libqt5-widgets</run_depend>
+  <run_depend>rviz</run_depend>
   <run_depend>libpcl-all</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>rviz_camera_stream</run_depend>
@@ -54,6 +60,9 @@
   <run_depend>geometry_msgs</run_depend>
   <run_depend>rviz_lighting</run_depend>
   <run_depend>franka_gripper</run_depend>
+  <export>
+    <rviz plugin="${prefix}/plugin_desc.xml"/>
+  </export>
 
   <!-- The export tag contains other, unspecified, tags -->
   <!--<export>

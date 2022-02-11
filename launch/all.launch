@@ -10,7 +10,7 @@
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="static_cloud_transform" />
     </node>
-    <node pkg="drone_panda" type="pc_publish" name="pc_publish"/>
+
     
     <node pkg="drone_panda" type="static_publisher" name="panda_gripper_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
@@ -55,6 +55,7 @@
 	    <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">
             <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda.urdf" />
 	    </node>
+        <node pkg="drone_panda" type="pc_publish" name="pc_publish"/>
         <include file="$(find drone_panda)/launch/joint_state_pub.launch">  
             <arg name="only_virtual" value="true" />
         </include>
@@ -65,6 +66,8 @@
             <remap from="/panda_ik/output" to="/JointController/panda/joint_command"/>
 		    <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda.urdf" />
 	    </node>
+        <node pkg="drone_panda" type="pcl_plane_to_bounding" name="pcl_plane_to_bounding"/>
+        <node pkg="drone_panda" type="cloudplane" name="cloudplane"/>
 	</group>
 
     <group if="$(arg use_joy)">

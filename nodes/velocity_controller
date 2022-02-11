@@ -22,7 +22,7 @@ class VelocityController(object):
         self._tfBuffer = tf2_ros.Buffer()
         self._tl = tf2_ros.TransformListener(self._tfBuffer)
         rospy.sleep(1.5)
-        self._control_frame = 'drone'
+        self._control_frame = 'panda_link0'
 
         self._goal_pub = rospy.Publisher('/panda_ik/input', TwistStamped, queue_size=1)
         self._twist_sub = rospy.Subscriber("/commanded_vel", Twist, self.on_twist)

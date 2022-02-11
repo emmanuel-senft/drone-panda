@@ -60,9 +60,24 @@ catkin_package(
 )
 
 
+
 ###########
 ## Build ##
 ###########
+
+if(rviz_QT_VERSION VERSION_LESS "5")
+  message(STATUS "Using Qt4 based on the rviz_QT_VERSION: ${rviz_QT_VERSION}")
+  find_package(Qt4 ${rviz_QT_VERSION} EXACT REQUIRED QtCore QtGui)
+  ## pull in all required include dirs, define QT_LIBRARIES, etc.
+  include(${QT_USE_FILE})
+else()
+  message(STATUS "Using Qt5 based on the rviz_QT_VERSION: ${rviz_QT_VERSION}")
+  find_package(Qt5 ${rviz_QT_VERSION} EXACT REQUIRED Core Widgets)
+  ## make target_link_libraries(${QT_LIBRARIES}) pull in all required dependencies
+  set(QT_LIBRARIES Qt5::Widgets)
+endif()
+
+add_definitions(-DQT_NO_KEYWORDS)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
@@ -84,6 +99,12 @@ if(DHDC)
      ${DHDC}
   )
 endif()
+
+set(SOURCE_FILES src/dronepanel.cpp)
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
+
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${catkin_LIBRARIES})
+
 
 add_executable(cloudplane src/PCLPlanes.cpp)
 target_link_libraries(cloudplane ${catkin_LIBRARIES} ${PCL_LIBRARIES})
@@ -126,6 +147,8 @@ catkin_install_python(PROGRAMS
     nodes/spacemouse_driver
     nodes/map_odometry
     nodes/env_mapping
+    nodes/pc_record
+    nodes/pcl_plane_to_bounding
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(DHDC)
