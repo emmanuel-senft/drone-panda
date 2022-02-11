@@ -22,6 +22,11 @@
         <param name="transform" type="string" value="drone_camera" />
     </node>
 
+        <node pkg="drone_panda" type="static_publisher" name="ee_camera_static_publisher">
+        <param name="file_name" type="string" value="transforms.yaml" />
+        <param name="transform" type="string" value="ee_camera" />
+    </node>
+
     <node pkg="drone_panda" type="static_publisher" name="sim_ee_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="sim_ee_transform" />
@@ -41,8 +46,6 @@
 
     <node pkg="drone_panda" type="velocity_controller" name="velocity_controller" output="screen">
     </node>
-
-   <node pkg="drone_panda" type="virtual_drone_manager" name="virtual_camera_manager" output="screen"/> 
 
     <node name="compress_virtual" pkg="image_transport" type="republish" args="raw in:=/rviz1/camera1/image compressed out:=/virtual_camera/image_repub">
     </node>
@@ -80,7 +83,7 @@
     </group>
 
     <group if="$(arg virtual_drone)">
-
+        <node pkg="drone_panda" type="virtual_drone_manager" name="virtual_camera_manager" output="screen"/> 
     </group>
 
     <group unless="$(arg virtual_drone)">

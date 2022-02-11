@@ -2,6 +2,7 @@
 from typing import Callable
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped, TwistStamped
+from std_msgs.msg import String
 import tf2_geometry_msgs
 import tf
 from tf.transformations import *
@@ -12,8 +13,8 @@ import PyKDL
 from scipy.spatial.transform import Rotation
 
 REFERENCE_FRAME='panda_link0'
-# CAMERA_FRAME='drone'
-CAMERA_FRAME='panda_link0'
+CAMERA_FRAME='drone'
+#CAMERA_FRAME='panda_link0'
 
 class VelocityController(object):
     def __init__(self):
@@ -21,12 +22,17 @@ class VelocityController(object):
         self._tfBuffer = tf2_ros.Buffer()
         self._tl = tf2_ros.TransformListener(self._tfBuffer)
         rospy.sleep(1.5)
+        self._control_frame = 'drone'
 
         self._goal_pub = rospy.Publisher('/panda_ik/input', TwistStamped, queue_size=1)
         self._twist_sub = rospy.Subscriber("/commanded_vel", Twist, self.on_twist)
+        self._control_frame_sub = rospy.Subscriber("/control_frame", String, self.on_control_frame)
+    
+    def on_control_frame(self, msg):
+        self._control_frame = msg.data
             
     def on_twist(self, msg):
-        camera_t = self._tfBuffer.lookup_transform(REFERENCE_FRAME,CAMERA_FRAME,rospy.Time(0))
+        control_t = self._tfBuffer.lookup_transform(REFERENCE_FRAME,self._control_frame,rospy.Time(0))
         t=PyKDL.Twist()
         t[0]=msg.linear.x
         t[1]=msg.linear.y
@@ -34,8 +40,10 @@ class VelocityController(object):
         t[3]=msg.angular.x
         t[4]=msg.angular.y
         t[5]=msg.angular.z
-        rpy=PyKDL.Rotation.Quaternion(camera_t.transform.rotation.x,camera_t.transform.rotation.y,camera_t.transform.rotation.z,camera_t.transform.rotation.w).GetRPY()
-        R=PyKDL.Rotation.RPY(0,0,rpy[2])
+        rpy=PyKDL.Rotation.Quaternion(control_t.transform.rotation.x,control_t.transform.rotation.y,control_t.transform.rotation.z,control_t.transform.rotation.w).GetRPY()
+        R=PyKDL.Rotation.RPY(rpy[0],rpy[1],rpy[2])
+        if self._control_frame == CAMERA_FRAME:
+            R=PyKDL.Rotation.RPY(0,0,rpy[2])
         t=R*t
 
         twist = TwistStamped()
