@@ -44,7 +44,7 @@ class EnvMapping:
         if self._p is not None:
             self._p.terminate()  
         if self.lastcloud:
-            self.pub(self.lastcloud)
+            self.pub.publish(self.lastcloud)
             
 
        
