@@ -51,6 +51,9 @@
     </node>
 
 
+        <node pkg="drone_panda" type="pcl_plane_to_bounding" name="pcl_plane_to_bounding"/>
+        <node pkg="drone_panda" type="cloudplane" name="cloudplane"/>
+
     <group if="$(arg virtual_robot)">
 	    <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">
             <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda.urdf" />
@@ -66,8 +69,7 @@
             <remap from="/panda_ik/output" to="/JointController/panda/joint_command"/>
 		    <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda.urdf" />
 	    </node>
-        <node pkg="drone_panda" type="pcl_plane_to_bounding" name="pcl_plane_to_bounding"/>
-        <node pkg="drone_panda" type="cloudplane" name="cloudplane"/>
+        <node pkg="drone_panda" type="pc_publish" name="pc_publish"/>
 	</group>
 
     <group if="$(arg use_joy)">
@@ -90,17 +92,13 @@
     </group>
 
     <group unless="$(arg virtual_drone)">
-	    <include file="$(find drone_panda)/launch/mocap.launch">  
-	    </include>
+        <include file="$(find drone_panda)/launch/mocap.launch">  
+        </include>
 
-	    <node pkg="drone_panda" type="static_publisher" name="mocap_camera_static_publisher">
+        <node pkg="drone_panda" type="static_publisher" name="mocap_camera_static_publisher">
             <param name="file_name" type="string" value="transforms.yaml" />
-    		<param name="transform" type="string" value="mocap" />
-	    </node>
-
-	    <node pkg="drone_panda" type="tello_driver" name="tello_driver" output="screen">
-	    </node>
-
+            <param name="transform" type="string" value="mocap" />
+        </node>
     </group>
 
 </launch>
