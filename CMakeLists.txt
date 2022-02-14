@@ -143,6 +143,7 @@ catkin_install_python(PROGRAMS
     nodes/rviz_manager
     nodes/drone_controller
     nodes/tello_driver
+    nodes/tello_driver_launcher
     nodes/velocity_controller
     nodes/joy_driver
     nodes/spacemouse_driver
@@ -150,6 +151,7 @@ catkin_install_python(PROGRAMS
     nodes/env_mapping
     nodes/pc_record
     nodes/pcl_plane_to_bounding
+    nodes/drone_mesh
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(DHDC)

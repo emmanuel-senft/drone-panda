@@ -53,6 +53,7 @@
 
         <node pkg="drone_panda" type="pcl_plane_to_bounding" name="pcl_plane_to_bounding"/>
         <node pkg="drone_panda" type="cloudplane" name="cloudplane"/>
+        <node pkg="drone_panda" type="drone_mesh" name="drone_mesh"/>
 
     <group if="$(arg virtual_robot)">
 	    <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">

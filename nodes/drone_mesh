@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+import rospy
+from sensor_msgs.msg import PointCloud2, Image
+from visualization_msgs.msg import Marker
+import numpy as np
+import sys
+import rospkg
+import tf2_ros
+import time
+
+
+
+def droneMarker(trans):
+    global marker_pub
+    m = Marker()
+    m.ns = "currDrone"
+    m.header.frame_id="panda_link0"
+    m.mesh_resource = "package://drone_panda/meshes/fake_drone.STL";
+    m.type = 10
+    m.color.a=.8
+    m.color.r = 0.0
+    m.color.g = 1.0
+    m.color.b = 0.0
+    m.scale.x = 1.0
+    m.scale.y = 1.0
+    m.scale.z = 1.0
+    m.pose.position.x = trans.transform.translation.x
+    m.pose.position.y = trans.transform.translation.y
+    m.pose.position.z = trans.transform.translation.z
+    m.pose.orientation.x = trans.transform.rotation.x
+    m.pose.orientation.y = trans.transform.rotation.y
+    m.pose.orientation.z = trans.transform.rotation.z
+    m.pose.orientation.w = trans.transform.rotation.w
+    marker_pub.publish(m)
+
+def tf_drone_listener():
+    global marker_pub
+    rospy.init_node('currDroneMeshListener')
+    
+    tfBuffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tfBuffer)
+
+    marker_pub = rospy.Publisher('currDrone', Marker, queue_size=1)
+
+    time.sleep(0.5)
+    rate = rospy.Rate(1000.0)
+
+    while not rospy.is_shutdown():
+        try:
+            trans = tfBuffer.lookup_transform('panda_link0', 'drone', rospy.Time())
+            droneMarker(trans)
+
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            rate.sleep()
+            continue
+
+        
+
+if __name__ == '__main__':
+    tf_drone_listener()
+
+
