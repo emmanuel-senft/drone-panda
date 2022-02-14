@@ -17,6 +17,8 @@
 #include <QFont>
 #include <QSizePolicy>
 #include <QString>
+#include <QScreen>
+#include <QGuiApplication>
 
 
 #include <ros/console.h>
@@ -33,6 +35,10 @@
 namespace drone_panel{
 
     DronePanel::DronePanel(QWidget* parent): rviz::Panel(parent){
+
+        int screenWidth = QGuiApplication::primaryScreen()->geometry().size().width();
+        int screenRatio = screenWidth/1920;
+
         cf = 0; //control frame is originally global robot
         mapping = false;
 
@@ -46,10 +52,10 @@ namespace drone_panel{
 
         QWidget *cfBox = new QWidget;
         QHBoxLayout* cfLayout = new QHBoxLayout(cfBox);
-        cfBox->setStyleSheet("background-color: #dae3e3; border-radius: 10px; border-color: #b6b8b8");
-        cfBox->setFixedWidth(500);
+        cfBox->setStyleSheet("background-color: #dae3e3; border-radius: 10pt; border-color: #b6b8b8");
+        cfBox->setFixedWidth(500*screenRatio);
         QPushButton* toggleControlbutton = new QPushButton("Toggle Control Frame");
-        toggleControlbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2px; border-radius: 10px; border-color: #B6D5E7; font: bold 20px; min-width: 10em; padding: 6px;");
+        toggleControlbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 10em; padding: 6pt;");
         QLabel* curr_cf = new QLabel("panda_link0");
         curr_cf->setAlignment(Qt::AlignCenter);
         curr_cf->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
@@ -62,16 +68,16 @@ namespace drone_panel{
 
         QWidget *mappingBox = new QWidget;
         QHBoxLayout* mappingLayout = new QHBoxLayout(mappingBox);
-        mappingBox->setStyleSheet("background-color: #dae3e3; border-radius: 10px; border-color: #b6b8b8");
-        mappingBox->setFixedWidth(300);
+        mappingBox->setStyleSheet("background-color: #dae3e3; border-radius: 10pt; border-color: #b6b8b8");
+        mappingBox->setFixedWidth(300*screenRatio);
         QPushButton* toggleMappingbutton = new QPushButton("Start Mapping");
-        toggleMappingbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2px; border-radius: 10px; border-color: #B6D5E7; font: bold 20px; min-width: 10em; padding: 6px;");
+        toggleMappingbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 10em; padding: 6pt;");
         mappingLayout->addWidget(toggleMappingbutton);
 
         QWidget *batteryBox = new QWidget;
         QHBoxLayout* batteryLayout = new QHBoxLayout(batteryBox);
-        batteryBox->setStyleSheet("background-color: #dae3e3; border-radius: 10px; border-color: #b6b8b8");
-        batteryBox->setFixedWidth(300);
+        batteryBox->setStyleSheet("background-color: #dae3e3; border-radius: 10pt; border-color: #b6b8b8");
+        batteryBox->setFixedWidth(300*screenRatio);
         bat = new QLabel("Drone Battery: NA");
         bat->setAlignment(Qt::AlignCenter);
         bat->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
@@ -113,13 +119,13 @@ namespace drone_panel{
            if(!mapping){
             s_out.data = "on";
             toggleMappingbutton->setText("End Mapping");
-            toggleMappingbutton->setStyleSheet("background-color: #FF968A; border-style: solid; border-width: 2px; border-radius: 10px; border-color: #B6D5E7; font: bold 20px; min-width: 10em; padding: 6px;");
+            toggleMappingbutton->setStyleSheet("background-color: #FF968A; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 10em; padding: 6pt;");
             mapping = true;
            }
            else{
                s_out.data = "off";
                toggleMappingbutton->setText("Start Mapping");
-               toggleMappingbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2px; border-radius: 10px; border-color: #B6D5E7; font: bold 20px; min-width: 10em; padding: 6px;");
+               toggleMappingbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 10em; padding: 6pt;");
                mapping = false;
            }
            mapping_pub.publish(s_out);

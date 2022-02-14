@@ -6,11 +6,13 @@ import ros_numpy
 from sensor_msgs.msg import Image
 from std_msgs.msg import Int16, String
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import CameraInfo
 import tf
 from tf.transformations import *
 import tf2_ros
 import signal
 import sys
+
 
 REFERENCE_FRAME='panda_link0'
 
@@ -36,14 +38,31 @@ class TelloDriver(object):
 
         self._twist = Twist()
         self._freq = 30
+
+        self._info_pub = rospy.Publisher("/tello/camera_info",CameraInfo,queue_size=1,latch=True)
+        self._info = CameraInfo()
+        self._info.header.frame_id = "camera1"
+        self._info.height = 720
+        self._info.width = 1280
+        fx = 1000
+        fy = fx
+        cx = 640
+        cy = 360
+        self._info.distortion_model = 'rational_polynomial'
+        self._info.D = [0.5248579382896423, -2.5943498611450195, 0.0008818571805022657, -0.000306136003928259, 1.4509135484695435, 0.4030783474445343, -2.42022705078125, 1.3811763525009155]
+        self._info.K = [fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0]
+        self._info.R = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        self._info.P =  [fx, 0.0, cx, 0.0, 0.0, fy, cy, 0.0, 0.0, 0.0, 1.0, 0.0]
+        self._info.roi.do_rectify = False 
+        
             
     def on_command(self, msg):
         if msg.data == "takeoff":
             self._tello.takeoff()
             self._tookoff = True
         if msg.data == "land":
-            self._tello.land()
             self._tookoff = False
+            self._tello.land()
 
     def on_twist(self, msg):
         if not self._tookoff:

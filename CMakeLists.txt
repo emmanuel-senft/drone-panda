@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
         pcl_conversions
         pcl_ros
         drone_ros_msgs
+	rviz
         )
 
 ## System dependencies
@@ -141,6 +142,7 @@ catkin_install_python(PROGRAMS
     nodes/pc_publish
     nodes/rviz_manager
     nodes/drone_controller
+    nodes/drone_controller_tuning
     nodes/tello_driver
     nodes/velocity_controller
     nodes/joy_driver
