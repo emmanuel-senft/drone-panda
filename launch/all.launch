@@ -94,6 +94,7 @@
     <group unless="$(arg virtual_drone)">
         <include file="$(find drone_panda)/launch/mocap.launch">  
         </include>
+        <node pkg="drone_panda" type="tello_driver_launcher" name="tello_driver_launcher"/>
 
         <node pkg="drone_panda" type="static_publisher" name="mocap_camera_static_publisher">
             <param name="file_name" type="string" value="transforms.yaml" />

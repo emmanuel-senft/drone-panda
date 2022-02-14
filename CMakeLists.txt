@@ -142,7 +142,6 @@ catkin_install_python(PROGRAMS
     nodes/pc_publish
     nodes/rviz_manager
     nodes/drone_controller
-    nodes/drone_controller_tuning
     nodes/tello_driver
     nodes/velocity_controller
     nodes/joy_driver

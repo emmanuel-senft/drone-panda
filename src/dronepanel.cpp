@@ -46,7 +46,7 @@ namespace drone_panel{
         cam_pos_pub = n.advertise<geometry_msgs::Point>("rviz_camera_p", 1);
         quat_pub = n.advertise<geometry_msgs::Quaternion>("rviz_camera_q", 1);
         cf_pub = n.advertise<std_msgs::String>("/control_frame", 1);
-        mapping_pub = n.advertise<std_msgs::String>("mappingToggle", 1);
+        rviz_pub = n.advertise<std_msgs::String>("rvizToggle", 1);
 
         battery_sub = n.subscribe("/tello/battery", 1, &DronePanel::batteryCallback, this);
 
@@ -77,7 +77,7 @@ namespace drone_panel{
         QWidget *batteryBox = new QWidget;
         QHBoxLayout* batteryLayout = new QHBoxLayout(batteryBox);
         batteryBox->setStyleSheet("background-color: #dae3e3; border-radius: 10pt; border-color: #b6b8b8");
-        batteryBox->setFixedWidth(300*screenRatio);
+        batteryBox->setFixedWidth(500*screenRatio);
         bat = new QLabel("Drone Battery: NA");
         bat->setAlignment(Qt::AlignCenter);
         bat->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
@@ -86,6 +86,9 @@ namespace drone_panel{
         bat_font.setBold(true);
         bat->setFont(bat_font);
         batteryLayout->addWidget(bat);
+        QPushButton* armDronebutton = new QPushButton("Start Drone");
+        armDronebutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 5em; padding: 6pt;");
+        batteryLayout->addWidget(armDronebutton);
 
         QHBoxLayout* hlayout = new QHBoxLayout;
         hlayout->addWidget(cfBox);
@@ -94,7 +97,7 @@ namespace drone_panel{
         hlayout->setSpacing(0);
         setLayout(hlayout);
 
-        // Start trial sends a trigger
+        // Change control frame
         connect(toggleControlbutton, &QPushButton::clicked, [this,toggleControlbutton,curr_cf](){
            if(cf==0){
                this->cf++;
@@ -114,7 +117,7 @@ namespace drone_panel{
            cf_pub.publish(s_out);
         });
 
-        // Start trial sends a trigger
+        // Turn on and off mapping
         connect(toggleMappingbutton, &QPushButton::clicked, [this,toggleMappingbutton](){
            if(!mapping){
             s_out.data = "on";
@@ -128,9 +131,15 @@ namespace drone_panel{
                toggleMappingbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 10em; padding: 6pt;");
                mapping = false;
            }
-           mapping_pub.publish(s_out);
+           rviz_pub.publish(s_out);
         });
 
+        // Start the real drone
+        connect(armDronebutton, &QPushButton::clicked, [this,armDronebutton](){
+            armDronebutton->setEnabled(false);
+            s_out.data = "tello";
+            rviz_pub.publish(s_out);
+        });
         
         // Timer used to publish the camera orientation from RVIZ for camera-centric controls
         QTimer* output_timer = new QTimer( this );  
@@ -154,6 +163,7 @@ namespace drone_panel{
     void DronePanel::batteryCallback(std_msgs::Int16 data){
         // Update the label with battery
         bat->setText(("Drone Battery: "+std::to_string(data.data)+"%").c_str());
+        bat->setStyleSheet(("color: rgb("+std::to_string(2*(100-data.data)+50)+",0,0)").c_str());
     }
 
 } // end namespace
