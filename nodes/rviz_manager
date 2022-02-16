@@ -5,8 +5,9 @@ import roslib; roslib.load_manifest('drone_panda')
 import signal
 import sys
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import String, Float64MultiArray
 import time
+import math
 
 ## Next import all the Qt bindings into the current namespace, for
 ## convenience.  This uses the "python_qt_binding" package which hides
@@ -23,6 +24,20 @@ except ImportError:
 ## Finally import the RViz bindings themselves.
 from rviz import bindings as rviz
 import rospkg
+
+class Params():
+    def __init__(self):
+        self.panda_sub = rospy.Subscriber(
+            '/panda_ik/rviz_cam_params', Float64MultiArray, self.get_panda_state)
+        self.distance = 1.5
+        self.pitch = math.pi / 6.0
+        self.yaw = math.pi / 6.0
+
+    def get_panda_state(self, msg):
+        if msg.data:
+            self.distance = msg.data[0]
+            self.pitch = msg.data[1]
+            self.yaw = msg.data[2]
 
 ## The MyViz class is the main container widget.
 class MyViz( QWidget ):
@@ -69,6 +84,11 @@ class MyViz( QWidget ):
         self.setLayout( layout )
         self.robot_model = self.manager.getRootDisplayGroup().getDisplayAt( 1 )
 
+        self.controller = self.manager.getViewManager().getCurrent()
+        params = Params()
+        self.controller.subProp("Distance").setValue(params.distance)
+        self.controller.subProp("Pitch").setValue(params.pitch)
+        self.controller.subProp("Yaw").setValue(params.yaw)
 
     def on_event( self, msg ):
         if msg.data == "start_edit":
@@ -84,7 +104,6 @@ if __name__ == '__main__':
     app = QApplication( sys.argv )
 
     rvizconfig = rospy.get_param('~rvizconfig')
-
     myviz = MyViz(rvizconfig)
     myviz.resize(2000,2000)
     myviz.show()
