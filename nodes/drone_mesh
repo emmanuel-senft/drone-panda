@@ -17,13 +17,14 @@ def droneMarker(trans):
     m.header.frame_id="panda_link0"
     m.mesh_resource = "package://drone_panda/meshes/fake_drone.STL";
     m.type = 10
-    m.color.a=.8
+    m.color.a=1
     m.color.r = 0.0
     m.color.g = 1.0
     m.color.b = 0.0
     m.scale.x = 1.0
     m.scale.y = 1.0
     m.scale.z = 1.0
+    m.action = 0
     m.pose.position.x = trans.transform.translation.x
     m.pose.position.y = trans.transform.translation.y
     m.pose.position.z = trans.transform.translation.z
@@ -43,7 +44,7 @@ def tf_drone_listener():
     marker_pub = rospy.Publisher('currDrone', Marker, queue_size=1)
 
     time.sleep(0.5)
-    rate = rospy.Rate(1000.0)
+    rate = rospy.Rate(100.0)
 
     while not rospy.is_shutdown():
         try:

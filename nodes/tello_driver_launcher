@@ -19,11 +19,13 @@ class TelloLauncher:
     def __init__(self):
         rospy.init_node('tello_launcher')
         self._p = None
+        signal.signal(signal.SIGINT, self.signal_handler)
 
         # Subscribe to start/stop mapping
         rospy.Subscriber("rvizToggle", String, self.mappingToggle)
+        
 
-    def shutdown(self)
+    def shutdown(self):
         if self._p is not None:
             self._p.terminate()  
 
@@ -39,11 +41,11 @@ class TelloLauncher:
     def startTello(self):
         if self._p is not None:
             self._p.terminate() 
-        self._p = subprocess32.Popen(["roslaunch", "drone_panda", "tello_driver.launch"])
+        self._p = subprocess32.Popen(["roslaunch", "drone_panda", "tello.launch"])
+        
 
        
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, signal_handler)
     tello = TelloLauncher()
     rospy.spin()
     tello.shutdown()

@@ -83,7 +83,6 @@ class TelloDriver(object):
     def run(self):
         r = rospy.Rate(self._freq)
         while not rospy.is_shutdown():
-            self.set_vel()
             self.publish_state()
             self.publish_image()
             r.sleep()

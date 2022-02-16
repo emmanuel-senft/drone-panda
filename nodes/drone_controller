@@ -39,16 +39,16 @@ class VirtualDrone(object):
         t.transform.translation.z = .5
         t.transform.rotation.z = 1
 
-        self._freq = 100
+        self._freq = 120
 
         self._goal = None
         self._max_v_lin = .1
         self._max_v_rot = 2
 
-        self._k_lin_h = 2.5
-        self._d_lin_h = 1.5
-        self._k_lin_v = 4
-        self._d_lin_v = 1
+        self._k_lin_h = 2
+        self._d_lin_h = 4
+        self._k_lin_v = 5
+        self._d_lin_v = 2
         self._k_rot = 3
         self._d_rot = 0
         self._last_errors = np.zeros(4)
@@ -58,6 +58,15 @@ class VirtualDrone(object):
         #self._vel_pub = rospy.Publisher("/tello/vel",Twist,queue_size=1,latch=True)
         self._vel_pub = rospy.Publisher("/tello/vel",Twist,queue_size=1,latch=True)
         self._pose_sub = rospy.Subscriber("/panda_ik/drone_output", PoseStamped, self.on_pose)
+        self._pid_sub = rospy.Subscriber("/pid_param", Pose, self.on_pid_param)
+
+    def on_pid_param(self, msg):
+        self._k_lin_h = msg.position.x
+        self._d_lin_h = msg.position.y
+        self._k_lin_v = msg.position.z
+        self._d_lin_v = msg.orientation.x
+        self._k_rot = msg.orientation.y
+        self._d_rot = msg.orientation.z
 
     def filter(self, last_x,x,last_y):
         a=self._a
