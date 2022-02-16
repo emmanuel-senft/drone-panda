@@ -39,6 +39,7 @@ namespace drone_panel
             geometry_msgs::Point pos_out;
             ros::Publisher cf_pub;
             ros::Publisher rviz_pub;
+            ros::Publisher altview_pub;
             int cf; // int corresponding to which control frame
             bool mapping;
             QLabel* bat;

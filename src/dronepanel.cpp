@@ -47,6 +47,7 @@ namespace drone_panel{
         quat_pub = n.advertise<geometry_msgs::Quaternion>("rviz_camera_q", 1);
         cf_pub = n.advertise<std_msgs::String>("/control_frame", 1);
         rviz_pub = n.advertise<std_msgs::String>("rvizToggle", 1);
+        altview_pub = n.advertise<std_msgs::String>("/view_manager/command", 1);
 
         battery_sub = n.subscribe("/tello/battery", 1, &DronePanel::batteryCallback, this);
 
@@ -74,6 +75,14 @@ namespace drone_panel{
         toggleMappingbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 10em; padding: 6pt;");
         mappingLayout->addWidget(toggleMappingbutton);
 
+        QWidget *viewBox = new QWidget;
+        QHBoxLayout* viewLayout = new QHBoxLayout(viewBox);
+        viewBox->setStyleSheet("background-color: #dae3e3; border-radius: 10pt; border-color: #b6b8b8");
+        viewBox->setFixedWidth(300*screenRatio);
+        QPushButton* altViewbutton = new QPushButton("Alternate View");
+        altViewbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 10em; padding: 6pt;");
+        viewLayout->addWidget(altViewbutton);
+
         QWidget *batteryBox = new QWidget;
         QHBoxLayout* batteryLayout = new QHBoxLayout(batteryBox);
         batteryBox->setStyleSheet("background-color: #dae3e3; border-radius: 10pt; border-color: #b6b8b8");
@@ -93,6 +102,7 @@ namespace drone_panel{
         QHBoxLayout* hlayout = new QHBoxLayout;
         hlayout->addWidget(cfBox);
         hlayout->addWidget(mappingBox);
+        hlayout->addWidget(viewBox);
         hlayout->addWidget(batteryBox);
         hlayout->setSpacing(0);
         setLayout(hlayout);
@@ -132,6 +142,13 @@ namespace drone_panel{
                mapping = false;
            }
            rviz_pub.publish(s_out);
+        });
+
+        // Start the real drone
+        connect(altViewbutton, &QPushButton::clicked, [this,altViewbutton](){
+            // altViewbutton->setEnabled(false);
+            s_out.data = "go";
+            altview_pub.publish(s_out);
         });
 
         // Start the real drone
