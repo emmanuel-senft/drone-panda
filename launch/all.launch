@@ -46,6 +46,8 @@
 
     <node pkg="drone_panda" type="velocity_controller" name="velocity_controller" output="screen">
     </node>
+        <node pkg="drone_panda" type="alternate_view_manager" name="alternate_view_manager" output="screen">
+    </node>
 
     <node name="compress_virtual" pkg="image_transport" type="republish" args="raw in:=/rviz1/camera1/image compressed out:=/virtual_camera/image_repub">
     </node>

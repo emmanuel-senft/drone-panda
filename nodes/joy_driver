@@ -27,14 +27,17 @@ class JoyDriver(object):
             self._grasp_client = actionlib.SimpleActionClient('/franka_gripper/grasp', franka_gripper.msg.GraspAction)
         
         self._drone_command_pub = rospy.Publisher("/tello/cmd", String, queue_size=1)
+        self._view_command_pub = rospy.Publisher('/view_manager/command', String, queue_size=1)
 
         self._joy_sub = rospy.Subscriber('/joy', Joy, self.on_joy)
+
         self._a_pressed = False
         self._b_pressed = False
         self._x_pressed = False
         self._grasped = False
         self._ax2_init = False
         self._ax5_init = False
+        self._y_pressed = False
             
     def on_joy(self, msg):
         ax = np.array(msg.axes)
@@ -96,7 +99,13 @@ class JoyDriver(object):
             self._x_pressed = True
             self._drone_command_pub.publish("land")
         if not msg.buttons[2] and self._x_pressed:
-            self._b_pressed = False
+            self._x_pressed = False
+
+        if msg.buttons[3] and not self._y_pressed:
+            self._y_pressed = True
+            self._view_command_pub.publish("go")
+        if not msg.buttons[3] and self._y_pressed:
+            self._y_pressed = False
     
     def run(self):
         rospy.spin()
