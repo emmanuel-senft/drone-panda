@@ -215,7 +215,7 @@ def processPlanes(data):
         for ii in range(0,len(plane_pts_rot[:,0])):
             bin_image[x_inds[ii],y_inds[ii]]=1
 
-        bin_image = ndimage.binary_erosion(bin_image).astype(bin_image.dtype)
+        bin_image = ndimage.binary_erosion(bin_image,iterations=1).astype(bin_image.dtype)
 
         inds_post_erosion = np.nonzero(bin_image)
         eroded_pts = np.zeros((len(inds_post_erosion[0]),2))

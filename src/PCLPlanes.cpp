@@ -16,6 +16,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/conversions.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/filters/crop_box.h>
 
 // Export to custom message type
 #include "drone_ros_msgs/PlanesInliers.h"
@@ -34,6 +35,14 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     pcl::fromPCLPointCloud2(*cloud2, *cloud);
     std::cout << "Original Cloud Size: " << cloud->size() << std::endl;
 
+    pcl::CropBox<pcl::PointXYZ> boxFilter;
+    boxFilter.setMin(Eigen::Vector4f(-2.0, -2.0, 0.1, 1.0));
+    boxFilter.setMax(Eigen::Vector4f(2.0, 2.0, 2.0, 1.0));
+    boxFilter.setInputCloud(cloud);
+    boxFilter.filter(*cloud);
+
+    std::cout << "Filtered Cloud Size: " << cloud->size() << std::endl;
+
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     // Create the segmentation object
@@ -44,7 +53,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     seg.setModelType (pcl::SACMODEL_PLANE);
     seg.setMethodType (pcl::SAC_RANSAC);
     seg.setMaxIterations(1000);
-    seg.setDistanceThreshold (0.01);
+    seg.setDistanceThreshold (0.005);
 
 
   // Create the filtering object
@@ -52,7 +61,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
   drone_ros_msgs::PlanesInliersArr planes;
 
   int ii = 0, nr_points = (int) cloud->size ();
-  // While 30% of the original cloud is still there
+  // While 10% of the original cloud is still there
   while (cloud->size () > 0.3 * nr_points)
   {
     // Segment the largest planar component from the remaining cloud
@@ -64,34 +73,40 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
       break;
     }
 
+
     // Extract the inliers
     extract.setInputCloud (cloud);
     extract.setIndices (inliers);
     extract.setNegative (false);
     extract.filter (*cloud_p);
-    // std::cout << "Plane " << ii << ": " << cloud_p->width * cloud_p->height << " data points." << std::endl;
-    // std::cerr << "Model coefficients: " << coefficients->values[0] << " " 
-    //                                     << coefficients->values[1] << " "
-    //                                     << coefficients->values[2] << " " 
-    //                                     << coefficients->values[3] << std::endl;
-    // std::cerr << "Model inliers: " << inliers->indices.size () << std::endl;
 
-    // Send result out on custom topic
-    drone_ros_msgs::PlanesInliers tempplane;
-    tempplane.a.data = coefficients->values[0];
-    tempplane.b.data = coefficients->values[1];
-    tempplane.c.data = coefficients->values[2];
-    tempplane.d.data = coefficients->values[3];
+    if(inliers->indices.size () >3000){
+      // std::cout << "Plane " << ii << ": " << cloud_p->width * cloud_p->height << " data points." << std::endl;
+      // std::cerr << "Model coefficients: " << coefficients->values[0] << " " 
+      //                                     << coefficients->values[1] << " "
+      //                                     << coefficients->values[2] << " " 
+      //                                     << coefficients->values[3] << std::endl;
+      // std::cerr << "Model inliers: " << inliers->indices.size () << std::endl;
 
-    for(int jj=0; jj<(int) inliers->indices.size(); jj++){
-        // tempplane.x.data.push_back(cloud_p->points[jj].x);
-        tempplane.x.data.push_back(cloud_p->points[jj].x);
-        tempplane.y.data.push_back(cloud_p->points[jj].y);
-        tempplane.z.data.push_back(cloud_p->points[jj].z);
-    }
+      // Send result out on custom topic
+      drone_ros_msgs::PlanesInliers tempplane;
+      tempplane.a.data = coefficients->values[0];
+      tempplane.b.data = coefficients->values[1];
+      tempplane.c.data = coefficients->values[2];
+      tempplane.d.data = coefficients->values[3];
+
+      for(int jj=0; jj<(int) inliers->indices.size(); jj++){
+          // tempplane.x.data.push_back(cloud_p->points[jj].x);
+          tempplane.x.data.push_back(cloud_p->points[jj].x);
+          tempplane.y.data.push_back(cloud_p->points[jj].y);
+          tempplane.z.data.push_back(cloud_p->points[jj].z);
+      }
+    
 
     // Publish the data.
+    
     planes.planes.push_back(tempplane);
+    }
     
 
     // Create the filtering object
