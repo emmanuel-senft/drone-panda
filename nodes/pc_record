@@ -27,7 +27,7 @@ def mappingToggle(data):
 def getPC():
     rospy.init_node('pc_recorder')
     rospy.Subscriber("/rtabmap/cloud_map", PointCloud2, saveCloud)
-    rospy.Subscriber("mappingToggle", String, mappingToggle)
+    rospy.Subscriber("rvizToggle", String, mappingToggle)
     rospy.spin()
 
 

@@ -32,8 +32,8 @@ class ViewManager(object):
             self._costs.pop(0)
         best_idx = np.argmin(self._costs)
         self._pose_display_pub.publish(self._alternatives[best_idx])
-        print("Current cost: "+str(self._current_cost))
-        print("Best cost: "+str(min(self._costs)))
+        # print("Current cost: "+str(self._current_cost))
+        # print("Best cost: "+str(min(self._costs)))
             
     def on_cost(self, msg):
         self._current_cost = msg.data

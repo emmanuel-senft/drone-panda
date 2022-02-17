@@ -2,7 +2,7 @@
 <launch>
     <arg name="virtual_robot" default="true"/>
     <arg name="virtual_drone" default="false"/>
-    <arg name="rvizconfig" default="simu.rviz"/>
+    <arg name="rvizconfig" default="real.rviz"/>
 
     <include file="$(find drone_panda)/launch/all.launch">  
         <arg name="virtual_robot" value="$(arg virtual_robot)" />
