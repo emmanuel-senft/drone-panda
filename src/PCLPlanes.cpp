@@ -17,6 +17,7 @@
 #include <pcl/conversions.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/crop_box.h>
+#include <pcl/filters/voxel_grid.h>
 
 // Export to custom message type
 #include "drone_ros_msgs/PlanesInliers.h"
@@ -43,6 +44,13 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
 
     std::cout << "Filtered Cloud Size: " << cloud->size() << std::endl;
 
+    pcl::VoxelGrid<pcl::PointXYZ> voxelFilter;
+    voxelFilter.setInputCloud(cloud);
+    voxelFilter.setLeafSize(0.01f, 0.01f, 0.01f);
+    voxelFilter.filter(*cloud);
+
+    std::cout << "Voxelized Cloud Size: " << cloud->size() << std::endl;
+
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     // Create the segmentation object
@@ -60,6 +68,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
   pcl::ExtractIndices<pcl::PointXYZ> extract;
   drone_ros_msgs::PlanesInliersArr planes;
 
+  int num_planes = 0;
   int ii = 0, nr_points = (int) cloud->size ();
   // While 10% of the original cloud is still there
   while (cloud->size () > 0.3 * nr_points)
@@ -80,7 +89,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     extract.setNegative (false);
     extract.filter (*cloud_p);
 
-    if(inliers->indices.size () >3000){
+    if(inliers->indices.size () >1000){
       // std::cout << "Plane " << ii << ": " << cloud_p->width * cloud_p->height << " data points." << std::endl;
       // std::cerr << "Model coefficients: " << coefficients->values[0] << " " 
       //                                     << coefficients->values[1] << " "
@@ -102,10 +111,11 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
           tempplane.z.data.push_back(cloud_p->points[jj].z);
       }
     
-
+    
     // Publish the data.
     
     planes.planes.push_back(tempplane);
+    num_planes++;
     }
     
 
@@ -116,6 +126,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     ii++;
   }
 
+  std::cout << "Num planes: " << num_planes << std::endl;
   planepub.publish(planes);
 
 }

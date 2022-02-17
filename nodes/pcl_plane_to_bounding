@@ -208,26 +208,35 @@ def processPlanes(data):
         plane_pts_rot = (rot.T @ plane_pts.T).T
 
         # Binary erosion
-        x_inds = np.digitize(plane_pts_rot[:,0],np.linspace(np.min(plane_pts_rot[:,0]),np.max(plane_pts_rot[:,0]),99))
-        y_inds = np.digitize(plane_pts_rot[:,1],np.linspace(np.min(plane_pts_rot[:,1]),np.max(plane_pts_rot[:,1]),99))
+        x_inds = np.digitize(plane_pts_rot[:,0],np.linspace(np.min(plane_pts_rot[:,0]),np.max(plane_pts_rot[:,0]),49))
+        y_inds = np.digitize(plane_pts_rot[:,1],np.linspace(np.min(plane_pts_rot[:,1]),np.max(plane_pts_rot[:,1]),49))
 
-        bin_image = np.zeros((100,100), dtype=np.int)
+        bin_image = np.zeros((50,50), dtype=np.int)
         for ii in range(0,len(plane_pts_rot[:,0])):
             bin_image[x_inds[ii],y_inds[ii]]=1
 
-        # bin_image = ndimage.binary_erosion(bin_image,iterations=1).astype(bin_image.dtype)
+        # plt.imshow(bin_image)
+        # plt.show()
+
+        bin_image = ndimage.binary_dilation(bin_image,iterations=1).astype(bin_image.dtype)
+        bin_image = ndimage.binary_erosion(bin_image,iterations=1).astype(bin_image.dtype)
 
         label_im, nb_labels = ndimage.label(bin_image)
         sizes = ndimage.sum(bin_image, label_im, range(nb_labels + 1))
         mask = sizes == max(sizes)
         bin_image = mask[label_im]
 
+        # plt.imshow(bin_image)
+        # plt.show()
+
         inds_post_erosion = np.nonzero(bin_image)
         eroded_pts = np.zeros((len(inds_post_erosion[0]),2))
         for ii in range(0,len(inds_post_erosion[0])):
-            eroded_pts[ii,0] = np.linspace(np.min(plane_pts_rot[:,0]),np.max(plane_pts_rot[:,0]),100)[inds_post_erosion[0][ii]]
-            eroded_pts[ii,1] = np.linspace(np.min(plane_pts_rot[:,1]),np.max(plane_pts_rot[:,1]),100)[inds_post_erosion[1][ii]]
+            eroded_pts[ii,0] = np.linspace(np.min(plane_pts_rot[:,0]),np.max(plane_pts_rot[:,0]),50)[inds_post_erosion[0][ii]]
+            eroded_pts[ii,1] = np.linspace(np.min(plane_pts_rot[:,1]),np.max(plane_pts_rot[:,1]),50)[inds_post_erosion[1][ii]]
 
+        # plt.scatter(eroded_pts[:,0],eroded_pts[:,1])
+        # plt.show()
 
         # Calculate rectangle
         rect_verts = minimum_bounding_rectangle(eroded_pts[:,:])

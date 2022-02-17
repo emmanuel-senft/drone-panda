@@ -19,19 +19,48 @@ class ViewManager(object):
         self._alternatives = []
         self._costs = []
         self._current_cost = 0
+
+        self._id = 0
     
     def on_command(self, msg):
         if msg.data == "go":
             self._drone_goal_pub.publish(self._alternatives[np.argmin(self._costs)])
+        if msg.data == "new":
+            if self._id<2:
+                self._id +=1
+            else:
+                self._id = 0
+
+            sorted_inds = np.argsort(self._costs)
+            selected_ind = sorted_inds[self._id]
+            self._pose_display_pub.publish(self._alternatives[selected_ind])
+
 
     def on_pose(self, msg):
-        self._alternatives.append(msg.pose)
-        self._costs.append(msg.cost.data)
+        # check if similar view is already in list
+        sim_view = False
+        proposed_pos = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z])
+        for ii in range(0,len(self._alternatives)):
+            alt_pos = np.array([self._alternatives[ii].pose.position.x, self._alternatives[ii].pose.position.y, self._alternatives[ii].pose.position.z])
+            if np.linalg.norm(alt_pos-proposed_pos)<0.1 and not sim_view:
+                if msg.cost.data<self._costs[ii]:
+                    self._alternatives[ii] = msg.pose
+                    sim_view = True
+                else:
+                    return
+        
+        # print(sim_view, len(self._alternatives))
+
+        if not sim_view:
+            self._alternatives.append(msg.pose)
+            self._costs.append(msg.cost.data)
+        
         if len(self._alternatives) > 10:
             self._alternatives.pop(0)
             self._costs.pop(0)
-        best_idx = np.argmin(self._costs)
-        self._pose_display_pub.publish(self._alternatives[best_idx])
+        sorted_inds = np.argsort(self._costs)
+        selected_ind = sorted_inds[self._id]
+        self._pose_display_pub.publish(self._alternatives[selected_ind])
         # print("Current cost: "+str(self._current_cost))
         # print("Best cost: "+str(min(self._costs)))
             

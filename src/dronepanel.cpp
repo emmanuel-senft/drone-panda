@@ -22,6 +22,7 @@
 
 
 #include <ros/console.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include <rviz/visualization_manager.h>
 #include <rviz/view_controller.h>
@@ -49,6 +50,8 @@ namespace drone_panel{
         rviz_pub = n.advertise<std_msgs::String>("rvizToggle", 1);
         altview_pub = n.advertise<std_msgs::String>("/view_manager/command", 1);
 
+        static tf2_ros::TransformBroadcaster br;
+
         battery_sub = n.subscribe("/tello/battery", 1, &DronePanel::batteryCallback, this);
 
         QWidget *cfBox = new QWidget;
@@ -57,7 +60,7 @@ namespace drone_panel{
         cfBox->setFixedWidth(500*screenRatio);
         QPushButton* toggleControlbutton = new QPushButton("Toggle Control Frame");
         toggleControlbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 10em; padding: 6pt;");
-        QLabel* curr_cf = new QLabel("panda_link0");
+        QLabel* curr_cf = new QLabel("Robot Base");
         curr_cf->setAlignment(Qt::AlignCenter);
         curr_cf->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
         QFont curr_cf_font = curr_cf -> font();
@@ -78,10 +81,17 @@ namespace drone_panel{
         QWidget *viewBox = new QWidget;
         QHBoxLayout* viewLayout = new QHBoxLayout(viewBox);
         viewBox->setStyleSheet("background-color: #dae3e3; border-radius: 10pt; border-color: #b6b8b8");
-        viewBox->setFixedWidth(300*screenRatio);
-        QPushButton* altViewbutton = new QPushButton("Alternate View");
-        altViewbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; min-width: 10em; padding: 6pt;");
+        viewBox->setFixedWidth(400*screenRatio);
+        QPushButton* altViewbutton = new QPushButton("Go to Alternate");
+        altViewbutton->setStyleSheet("background-color: #B6D5E7; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; padding: 6pt;");
+        altViewbutton->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+        altViewbutton->setMaximumWidth(300*screenRatio);
         viewLayout->addWidget(altViewbutton);
+        QPushButton* altViewNewbutton = new QPushButton("Cycle");
+        altViewNewbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+        altViewNewbutton->setMaximumWidth(100*screenRatio);
+        altViewNewbutton->setStyleSheet("background-color: #B6E7C1; border-style: solid; border-width: 2pt; border-radius: 10pt; border-color: #B6D5E7; font: bold 18pt; padding: 6pt;");
+        viewLayout->addWidget(altViewNewbutton);
 
         QWidget *batteryBox = new QWidget;
         QHBoxLayout* batteryLayout = new QHBoxLayout(batteryBox);
@@ -112,17 +122,22 @@ namespace drone_panel{
            if(cf==0){
                this->cf++;
                s_out.data ="drone";
-               curr_cf->setText("drone");
+               curr_cf->setText("Drone");
            }
            else if(cf==1){
                this->cf++;
                s_out.data ="panda_gripper";
-               curr_cf->setText("panda_gripper");
+               curr_cf->setText("Gripper");
+           }
+            else if(cf==2){
+               this->cf++;
+               s_out.data ="rvizframe";
+               curr_cf->setText("Simulation");
            }
            else{
                this->cf = 0;
                s_out.data ="panda_link0";
-               curr_cf->setText("panda_link0");
+               curr_cf->setText("Robot Base");
            }
            cf_pub.publish(s_out);
         });
@@ -144,10 +159,17 @@ namespace drone_panel{
            rviz_pub.publish(s_out);
         });
 
-        // Start the real drone
+        // Go to current alternate view
         connect(altViewbutton, &QPushButton::clicked, [this,altViewbutton](){
             // altViewbutton->setEnabled(false);
             s_out.data = "go";
+            altview_pub.publish(s_out);
+        });
+
+        // Get a different alternate view
+        connect(altViewNewbutton, &QPushButton::clicked, [this,altViewNewbutton](){
+            // altViewbutton->setEnabled(false);
+            s_out.data = "new";
             altview_pub.publish(s_out);
         });
 
@@ -167,11 +189,20 @@ namespace drone_panel{
             const Ogre::Quaternion quat = camera->getOrientation();
             const Ogre::Vector3 cam_pos = camera->getPosition();
             
-            // Convert from Ogre to ROS message
-            q_out.x = quat.x; q_out.y = quat.y; q_out.z = quat.z; q_out.w = quat.w;
-            pos_out.x = cam_pos.x; pos_out.y = cam_pos.y; pos_out.z = cam_pos.z; 
-            quat_pub.publish(q_out);
-            cam_pos_pub.publish(pos_out);
+            geometry_msgs::TransformStamped transformStamped;
+            transformStamped.header.stamp = ros::Time::now();
+            transformStamped.header.frame_id = "panda_link0";
+            transformStamped.child_frame_id = "rvizcamera";
+
+            transformStamped.transform.translation.x = cam_pos.x;
+            transformStamped.transform.translation.y = cam_pos.y;
+            transformStamped.transform.translation.z = cam_pos.z;
+            transformStamped.transform.rotation.x = quat.x;
+            transformStamped.transform.rotation.y = quat.y;
+            transformStamped.transform.rotation.z = quat.z;
+            transformStamped.transform.rotation.w = quat.w;
+
+            br.sendTransform(transformStamped);
         }); 
         output_timer->start(100);
 

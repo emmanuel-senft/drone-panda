@@ -12,6 +12,7 @@
 #include <rviz/panel.h>
 #include "geometry_msgs/Quaternion.h"
 #include "geometry_msgs/Point.h"
+#include "geometry_msgs/TransformStamped.h"
 #include "std_msgs/Int8.h"
 #include "std_msgs/String.h"
 #include "std_msgs/Int16.h"
@@ -35,8 +36,6 @@ namespace drone_panel
             ros::Publisher quat_pub;
             ros::Publisher cam_pos_pub;
             ros::Subscriber battery_sub;
-            geometry_msgs::Quaternion q_out;
-            geometry_msgs::Point pos_out;
             ros::Publisher cf_pub;
             ros::Publisher rviz_pub;
             ros::Publisher altview_pub;
