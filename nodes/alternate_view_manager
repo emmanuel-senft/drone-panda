@@ -6,6 +6,9 @@ from drone_ros_msgs.msg import PoseCost
 import signal
 import sys
 import numpy as np
+import tf2_ros
+import tf_conversions
+import geometry_msgs.msg
 
 class ViewManager(object):
     def __init__(self):
@@ -15,25 +18,46 @@ class ViewManager(object):
         self._cost_sub = rospy.Subscriber('/panda_ik/view_cost', Float32, self.on_cost)
         self._pose_sub = rospy.Subscriber('/panda_ik/global_solutions', PoseCost, self.on_pose)
         self._command_sub = rospy.Subscriber('/view_manager/command', String, self.on_command)
+
+        self.br = tf2_ros.TransformBroadcaster()
         
         self._alternatives = []
         self._costs = []
         self._current_cost = 0
 
         self._id = 0
+
+    def tf_from_pose_stamped(self,posestamped):
+        t = geometry_msgs.msg.TransformStamped()
+
+        t.header.stamp = rospy.Time.now()
+        t.header.frame_id = "panda_link0"
+        t.child_frame_id = "dronealt"
+        t.transform.translation.x = posestamped.pose.position.x
+        t.transform.translation.y = posestamped.pose.position.y
+        t.transform.translation.z = posestamped.pose.position.z
+        t.transform.rotation.x = posestamped.pose.orientation.x
+        t.transform.rotation.y = posestamped.pose.orientation.y
+        t.transform.rotation.z = posestamped.pose.orientation.z
+        t.transform.rotation.w = posestamped.pose.orientation.w
+        self.br.sendTransform(t)
+
     
     def on_command(self, msg):
+        sorted_inds = np.argsort(self._costs)
+        selected_ind = sorted_inds[self._id]
+
         if msg.data == "go":
-            self._drone_goal_pub.publish(self._alternatives[np.argmin(self._costs)])
+            self._drone_goal_pub.publish(self._alternatives[selected_ind])
         if msg.data == "new":
             if self._id<2:
                 self._id +=1
             else:
                 self._id = 0
 
-            sorted_inds = np.argsort(self._costs)
-            selected_ind = sorted_inds[self._id]
+            
             self._pose_display_pub.publish(self._alternatives[selected_ind])
+            self.tf_from_pose_stamped(self._alternatives[selected_ind])
 
 
     def on_pose(self, msg):
@@ -55,12 +79,14 @@ class ViewManager(object):
             self._alternatives.append(msg.pose)
             self._costs.append(msg.cost.data)
         
-        if len(self._alternatives) > 10:
+        if len(self._alternatives) > 5:
             self._alternatives.pop(0)
             self._costs.pop(0)
         sorted_inds = np.argsort(self._costs)
         selected_ind = sorted_inds[self._id]
         self._pose_display_pub.publish(self._alternatives[selected_ind])
+        self.tf_from_pose_stamped(self._alternatives[selected_ind])
+
         # print("Current cost: "+str(self._current_cost))
         # print("Best cost: "+str(min(self._costs)))
             

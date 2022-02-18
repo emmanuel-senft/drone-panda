@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /RobotModel1/Status1
         - /TF1/Frames1
         - /TF1/Tree1
         - /DroneCameraPub1/Visibility1
@@ -16,9 +17,10 @@ Panels:
         - /CameraPub1/Visibility1
         - /Camera1
         - /Pose3
-        - /RobotModel2
+        - /DroneCurrModel1
+        - /DroneAltModel1
       Splitter Ratio: 0.5289514660835266
-    Tree Height: 227
+    Tree Height: 212
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -163,60 +165,10 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        camera1:
-          Value: false
-        camera_base:
-          Value: false
-        camera_body:
-          Value: false
-        camera_visor:
-          Value: false
-        drone:
-          Value: true
-        drone_curr_mesh:
-          Value: true
-        ee_camera:
-          Value: true
-        ft_sensor_link:
-          Value: false
-        panda_gripper:
-          Value: false
-        panda_hand:
-          Value: false
-        panda_leftfinger:
-          Value: false
-        panda_link0:
-          Value: false
-        panda_link1:
-          Value: false
-        panda_link2:
-          Value: false
-        panda_link3:
-          Value: false
-        panda_link4:
-          Value: false
-        panda_link5:
-          Value: false
-        panda_link6:
-          Value: false
-        panda_link7:
-          Value: false
-        panda_link8:
-          Value: false
-        panda_rightfinger:
-          Value: false
-        rvizcamera:
-          Value: true
-        rvizframe:
-          Value: true
-        sim_panda_gripper:
-          Value: false
-        static_camera_link:
-          Value: false
       Marker Alpha: 1
       Marker Scale: 0.20000000298023224
       Name: TF
@@ -224,62 +176,15 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        panda_link0:
-          drone:
-            camera1:
-              {}
-            drone_curr_mesh:
-              {}
-          panda_link1:
-            panda_link2:
-              panda_link3:
-                panda_link4:
-                  panda_link5:
-                    panda_link6:
-                      panda_link7:
-                        ft_sensor_link:
-                          panda_link8:
-                            camera_base:
-                              camera_body:
-                                {}
-                              camera_visor:
-                                ee_camera:
-                                  {}
-                            panda_gripper:
-                              {}
-                            panda_hand:
-                              panda_leftfinger:
-                                {}
-                              panda_rightfinger:
-                                {}
-                              sim_panda_gripper:
-                                {}
-          rvizcamera:
-            rvizframe:
-              {}
-          static_camera_link:
-            {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /viz/meshes
       Name: Marker
       Namespaces:
-        pointsw: true
-        pointsǳ: true
-        pointsʭ: true
-        pointsН: true
-        points֒: true
-        pointsܰ: true
-        pointsެ: true
-        w: true
-        ǳ: true
-        ʭ: true
-        Н: true
-        ֒: true
-        ܰ: true
-        ެ: true
+        {}
       Queue Size: 100
       Value: true
     - Background Color: 0; 0; 0
@@ -298,6 +203,8 @@ Visualization Manager:
         Camera: true
         CameraPub: true
         Drone Camera: true
+        DroneAltModel: true
+        DroneCurrModel: true
         Grid: true
         Image: true
         Light: true
@@ -386,7 +293,7 @@ Visualization Manager:
       Axes Radius: 0.009999999776482582
       Class: rviz/Pose
       Color: 255; 25; 0
-      Enabled: true
+      Enabled: false
       Head Length: 0.30000001192092896
       Head Radius: 0.10000000149011612
       Name: Pose
@@ -396,7 +303,7 @@ Visualization Manager:
       Shape: Axes
       Topic: /panda_ik/panda_commanded_pose
       Unreliable: false
-      Value: true
+      Value: false
     - Class: rviz/Image
       Enabled: true
       Image Topic: /rviz1/camera1/image
@@ -424,7 +331,9 @@ Visualization Manager:
       Visibility:
         Camera: true
         Drone Camera: true
+        DroneAltModel: true
         DroneCameraPub: true
+        DroneCurrModel: true
         Grid: true
         Image: true
         Light: true
@@ -447,7 +356,9 @@ Visualization Manager:
       Visibility:
         CameraPub: true
         Drone Camera: true
+        DroneAltModel: true
         DroneCameraPub: true
+        DroneCurrModel: true
         Grid: true
         Image: true
         Light: true
@@ -463,7 +374,7 @@ Visualization Manager:
       Axes Radius: 0.10000000149011612
       Class: rviz/Pose
       Color: 0; 255; 0
-      Enabled: true
+      Enabled: false
       Head Length: 0.029999999329447746
       Head Radius: 0.009999999776482582
       Name: Pose
@@ -473,7 +384,7 @@ Visualization Manager:
       Shape: Arrow
       Topic: /alternative_pose
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
@@ -489,8 +400,29 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-      Name: RobotModel
+      Name: DroneCurrModel
       Robot Description: drone_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Alpha: 0.699999988079071
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        drone_alt_mesh:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: DroneAltModel
+      Robot Description: drone_alt_description
       TF Prefix: ""
       Update Interval: 0
       Value: true
@@ -523,7 +455,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.9430208206176758
+      Distance: 2.565232515335083
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -531,17 +463,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.1531656980514526
-        Y: -0.01476412732154131
-        Z: 0.5476083755493164
+        X: 0.6556656360626221
+        Y: 0.17266708612442017
+        Z: 0.3779580891132355
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.388598769903183
+      Pitch: 0.4085986912250519
       Target Frame: <Fixed Frame>
-      Yaw: 0.2585985064506531
+      Yaw: 0.46359899640083313
     Saved: ~
 Window Geometry:
   Camera:
@@ -552,12 +484,12 @@ Window Geometry:
     collapsed: false
   DronePanel:
     collapsed: false
-  Height: 1021
+  Height: 994
   Hide Left Dock: false
   Hide Right Dock: true
   Image:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000034d00000347fc020000000bfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000b2fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb0000001800440072006f006e0065002000430061006d006500720061010000003d0000017a0000001600fffffffc000001bd000001c7000000e60100001cfa000000000100000002fb0000000c00430061006d0065007200610100000000000002fa0000006900fffffffb000000100044006900730070006c0061007900730100000000ffffffff0000015600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d006100670065000000010c0000020f0000001600fffffffb0000000a0049006d00610067006501000001cd000001f80000000000000000000000010000016c0000037cfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000037c000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000076a00000056fc0100000003fb0000001400440072006f006e006500500061006e0065006c01000000000000076a000006b600fffffffb0000000800540069006d0065000000000000000329000004f300fffffffb0000000800540069006d00650100000000000004500000000000000000000004170000034700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000034d0000032cfc020000000bfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000b2fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb0000001800440072006f006e0065002000430061006d006500720061010000003d0000016e0000001600fffffffc000001b1000001b8000000e60100001cfa000000000100000002fb0000000c00430061006d0065007200610100000000000002fa0000006900fffffffb000000100044006900730070006c0061007900730100000000ffffffff0000015600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d006100670065000000010c0000020f0000001600fffffffb0000000a0049006d00610067006501000001cd000001f80000000000000000000000010000016c0000037cfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000037c000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000072200000056fc0100000003fb0000001400440072006f006e006500500061006e0065006c010000000000000722000006b600fffffffb0000000800540069006d0065000000000000000329000004f300fffffffb0000000800540069006d00650100000000000004500000000000000000000003cf0000032c00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -566,6 +498,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 1898
+  Width: 1826
   X: 11
   Y: 11

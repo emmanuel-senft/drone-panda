@@ -357,7 +357,7 @@ def processPlanes(data):
         x_inds = np.digitize(plane_pts_rot[:,0],np.linspace(np.min(plane_pts_rot[:,0]),np.min(plane_pts_rot[:,0])+rng,49))
         y_inds = np.digitize(plane_pts_rot[:,1],np.linspace(np.min(plane_pts_rot[:,1]),np.min(plane_pts_rot[:,1])+rng,49))
 
-        bin_image = np.zeros((50,50), dtype=np.int)
+        bin_image = np.zeros((50,50), dtype=int)
         for jj in range(0,len(plane_pts_rot[:,0])):
             bin_image[x_inds[jj],y_inds[jj]]=1
 

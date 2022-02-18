@@ -21,6 +21,11 @@
         <param name="transform" type="string" value="drone_curr_mesh" />
     </node>
 
+    <node pkg="drone_panda" type="static_publisher" name="drone_alt_mesh_static_publisher">
+        <param name="file_name" type="string" value="transforms.yaml" />
+        <param name="transform" type="string" value="drone_alt_mesh" />
+    </node>
+
     <node pkg="drone_panda" type="static_publisher" name="drone_camera_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="drone_camera" />
@@ -86,6 +91,7 @@
 	</group>
 
     <param name="drone_description" textfile="$(find drone_panda)/urdfs/drone.urdf" />
+    <param name="drone_alt_description" textfile="$(find drone_panda)/urdfs/dronealt.urdf" />
 
     <group if="$(arg use_joy)">
     	<include file="$(find teleop_twist_joy)/launch/teleop.launch">  
