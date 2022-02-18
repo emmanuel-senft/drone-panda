@@ -37,8 +37,8 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     std::cout << "Original Cloud Size: " << cloud->size() << std::endl;
 
     pcl::CropBox<pcl::PointXYZ> boxFilter;
-    boxFilter.setMin(Eigen::Vector4f(-2.0, -2.0, 0.1, 1.0));
-    boxFilter.setMax(Eigen::Vector4f(2.0, 2.0, 2.0, 1.0));
+    boxFilter.setMin(Eigen::Vector4f(-1.2, -1.2, 0.1, 1.0));
+    boxFilter.setMax(Eigen::Vector4f(1.2, 1.2, 2.0, 1.0));
     boxFilter.setInputCloud(cloud);
     boxFilter.filter(*cloud);
 

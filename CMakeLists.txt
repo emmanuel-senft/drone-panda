@@ -151,7 +151,6 @@ catkin_install_python(PROGRAMS
     nodes/env_mapping
     nodes/pc_record
     nodes/pcl_plane_to_bounding
-    nodes/drone_mesh
     nodes/alternate_view_manager
     nodes/autonomous_mapping
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

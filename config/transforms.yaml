@@ -17,6 +17,7 @@ sim_ee_transform: 0 0 0.1033995 1 0 0 0 panda_hand sim_panda_gripper
 rotated_camera: 0 0 0 0.707106 -0.707106 0 0 internal_rgb_camera_link rotated_camera
 drone_camera: 0 0 0 .5 -.5 .5 -.5 drone camera1
 drone_curr_mesh: 0 0 0 0 0 0 1 drone drone_curr_mesh
+drone_alt_mesh: 0 0 0 0 0 0 1 drone drone_alt_mesh
 rvizcamera: 0 0 0 -.5 .5 .5 .5 rvizcamera rvizframe
 ee_camera: 0 0 0 .5 -.5 .5 -.5 camera_visor ee_camera
 mocap: 0 0.05 0 0 0 0 1 panda_link0 mocap_world
