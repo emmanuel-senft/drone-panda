@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-import roslib; roslib.load_manifest('drone_panda')
+import roslib
+
+roslib.load_manifest("drone_panda")
 
 ## Then load sys to get sys.argv.
 import signal
 import sys
 import rospy
 from std_msgs.msg import String, Float64MultiArray
-import time
-import math
 
 ## Next import all the Qt bindings into the current namespace, for
 ## convenience.  This uses the "python_qt_binding" package which hides
@@ -16,6 +16,7 @@ import math
 ## python_qt_binding internally, so you should use it here as well.
 from python_qt_binding.QtGui import *
 from python_qt_binding.QtCore import *
+
 try:
     from python_qt_binding.QtWidgets import *
 except ImportError:
@@ -25,34 +26,20 @@ except ImportError:
 from rviz import bindings as rviz
 import rospkg
 
-class Params():
-    def __init__(self):
-        self.panda_sub = rospy.Subscriber(
-            '/panda_ik/rviz_cam_params', Float64MultiArray, self.get_panda_state)
-        self.distance = 1.5
-        self.pitch = math.pi / 6.0
-        self.yaw = math.pi / 6.0
-
-    def get_panda_state(self, msg):
-        if msg.data:
-            self.distance = msg.data[0]
-            self.pitch = msg.data[1]
-            self.yaw = msg.data[2]
-
 ## The MyViz class is the main container widget.
-class MyViz( QWidget ):
-    def __init__(self,rvizconfig):
+class MyViz(QWidget):
+    def __init__(self, rvizconfig):
         QWidget.__init__(self)
         self._event_sub = rospy.Subscriber("/event", String, self.on_event)
         ## rviz.VisualizationFrame is the main container widget of the
         ## regular RViz application, with menus, a toolbar, a status
-        ## bar, and many docked subpanels. 
+        ## bar, and many docked subpanels.
         self.frame = rviz.VisualizationFrame()
 
         ## The "splash path" is the full path of an image file which
         ## gets shown during loading.  Setting it to the empty string
         ## suppresses that behavior.
-        self.frame.setSplashPath( "" )
+        self.frame.setSplashPath("")
 
         ## VisualizationFrame.initialize() must be called before
         ## VisualizationFrame.load().  In fact it must be called
@@ -66,48 +53,62 @@ class MyViz( QWidget ):
         reader = rviz.YamlConfigReader()
         config = rviz.Config()
         rospack = rospkg.RosPack()
-        path = rospack.get_path('drone_panda')+'/rviz/'+rvizconfig
+        path = rospack.get_path("drone_panda") + "/rviz/" + rvizconfig
 
-        reader.readFile( config, path)
-        self.frame.load( config )
+        reader.readFile(config, path)
+        self.frame.load(config)
 
         ## frame.getManager() returns the VisualizationManager
         ## instance, which is a very central class.  It has pointers
         ## to other manager objects and is generally required to make
         ## any changes in an rviz instance.
         self.manager = self.frame.getManager()
-     
         ## Here we create the layout and other widgets in the usual Qt way.
         layout = QVBoxLayout()
-        layout.addWidget( self.frame )
-    
-        self.setLayout( layout )
-        self.robot_model = self.manager.getRootDisplayGroup().getDisplayAt( 1 )
+        layout.addWidget(self.frame)
 
-        self.controller = self.manager.getViewManager().getCurrent()
-        params = Params()
-        self.controller.subProp("Distance").setValue(params.distance)
-        self.controller.subProp("Pitch").setValue(params.pitch)
-        self.controller.subProp("Yaw").setValue(params.yaw)
+        self.setLayout(layout)
+        self.robot_model = self.manager.getRootDisplayGroup().getDisplayAt(1)
 
-    def on_event( self, msg ):
+        self.view_manager = self.manager.getViewManager()
+        self.controller = self.view_manager.getCurrent()
+        self.update_camera = False
+        self._params_sub = rospy.Subscriber("/rviz_cam_params", Float64MultiArray, self.set_params)
+        
+
+    def on_event(self, msg):
         if msg.data == "start_edit":
-            self.robot_model.subProp( "Visual Enabled" ).setValue( False )
+            self.robot_model.subProp("Visual Enabled").setValue(False)
         if msg.data == "stop_edit" or msg.data == "test":
-            self.robot_model.subProp( "Visual Enabled" ).setValue( True )
-            
+            self.robot_model.subProp("Visual Enabled").setValue(True)
+        if msg.data == "update_camera":
+            self.update_camera = True
+        if msg.data == "freeze_camera":
+            self.update_camera = False
+
+    def set_params(self, msg):
+        if msg.data:
+            # currently updates camera once when update_camera msg is sent to /event
+            if self.update_camera:
+                #self.controller.subProp("Distance").setValue(msg.data[0])
+                #self.controller.subProp("Pitch").setValue(msg.data[1])
+                #self.controller.subProp("Yaw").setValue(msg.data[2])
+                self.controller.lookAt(msg.data[0], msg.data[1], msg.data[2])
+                self.update_camera = False
+
     def signal_handler(self, signal, frame):
         QApplication.quit()
 
-if __name__ == '__main__':
-    rospy.init_node("rviz_manager")
-    app = QApplication( sys.argv )
 
-    rvizconfig = rospy.get_param('~rvizconfig')
+if __name__ == "__main__":
+    rospy.init_node("rviz_manager")
+    app = QApplication(sys.argv)
+
+    rvizconfig = rospy.get_param("~rvizconfig")
     myviz = MyViz(rvizconfig)
-    myviz.resize(2000,2000)
+    myviz.resize(2000, 2000)
     myviz.show()
-    #Allow python to capture keyboard interrup
+    # Allow python to capture keyboard interrup
     timer = QTimer()
     timer.timeout.connect(lambda: None)
     timer.start(100)
