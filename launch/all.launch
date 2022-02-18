@@ -47,6 +47,8 @@
     </node>
     <node pkg="drone_panda" type="drone_controller" name="drone_controller" output="screen">
     </node>
+    <!-- <node pkg="drone_panda" type="autonomous_mapping" name="autonomous_mapping" output="screen">
+    </node> -->
         
     <!-- startup rviz -->
     <node pkg="drone_panda" type="rviz_manager" name="rviz_manager">
