@@ -55,6 +55,8 @@
         <param name="rvizconfig" type="string" value="$(arg rvizconfig)" />
     </node>
 
+    <node pkg="drone_panda" type="rviz_camera" name="rviz_camera" output="screen" />
+
     <node pkg="drone_panda" type="velocity_controller" name="velocity_controller" output="screen">
     </node>
         <node pkg="drone_panda" type="alternate_view_manager" name="alternate_view_manager" output="screen">
