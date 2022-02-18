@@ -11,10 +11,14 @@
         <param name="transform" type="string" value="static_cloud_transform" />
     </node>
 
-    
     <node pkg="drone_panda" type="static_publisher" name="panda_gripper_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="sim_robot_transform" />
+    </node>
+
+    <node pkg="drone_panda" type="static_publisher" name="drone_curr_mesh_static_publisher">
+        <param name="file_name" type="string" value="transforms.yaml" />
+        <param name="transform" type="string" value="drone_curr_mesh" />
     </node>
 
     <node pkg="drone_panda" type="static_publisher" name="drone_camera_static_publisher">
@@ -22,7 +26,12 @@
         <param name="transform" type="string" value="drone_camera" />
     </node>
 
-        <node pkg="drone_panda" type="static_publisher" name="ee_camera_static_publisher">
+    <node pkg="drone_panda" type="static_publisher" name="rviz_camera_static_publisher">
+        <param name="file_name" type="string" value="transforms.yaml" />
+        <param name="transform" type="string" value="rvizcamera" />
+    </node>
+
+    <node pkg="drone_panda" type="static_publisher" name="ee_camera_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="ee_camera" />
     </node>
@@ -54,8 +63,7 @@
 
 
         <node pkg="drone_panda" type="pcl_plane_to_bounding" name="pcl_plane_to_bounding"/>
-        <node pkg="drone_panda" type="cloudplane" name="cloudplane"/>
-        <node pkg="drone_panda" type="drone_mesh" name="drone_mesh"/>
+        <node pkg="drone_panda" type="cloudplane" name="cloudplane" output="screen"/>
 
     <group if="$(arg virtual_robot)">
 	    <node pkg="panda_ik" type="panda_ik" name="panda_ik" output="screen">
@@ -72,8 +80,10 @@
             <remap from="/panda_ik/output" to="/JointController/panda/joint_command"/>
 		    <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda.urdf" />
 	    </node>
-        <node pkg="drone_panda" type="pc_publish" name="pc_publish"/>
+        <!-- <node pkg="drone_panda" type="pc_publish" name="pc_publish"/> -->
 	</group>
+
+    <param name="drone_description" textfile="$(find drone_panda)/urdfs/drone.urdf" />
 
     <group if="$(arg use_joy)">
     	<include file="$(find teleop_twist_joy)/launch/teleop.launch">  
