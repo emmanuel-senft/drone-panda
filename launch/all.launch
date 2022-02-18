@@ -80,7 +80,7 @@
             <remap from="/panda_ik/output" to="/JointController/panda/joint_command"/>
 		    <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda.urdf" />
 	    </node>
-        <!-- <node pkg="drone_panda" type="pc_publish" name="pc_publish"/> -->
+        <node pkg="drone_panda" type="pc_publish" name="pc_publish"/>
 	</group>
 
     <param name="drone_description" textfile="$(find drone_panda)/urdfs/drone.urdf" />

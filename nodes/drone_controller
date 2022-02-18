@@ -42,12 +42,13 @@ class VirtualDrone(object):
         self._freq = 120
 
         self._goal = None
-        self._max_v_lin = .1
+        self._max_v_lin = .2
+        self._max_v_h = .3
         self._max_v_rot = 2
 
-        self._k_lin_h = 2
-        self._d_lin_h = 4
-        self._k_lin_v = 5
+        self._k_lin_h = .8
+        self._d_lin_h = 5
+        self._k_lin_v = 3
         self._d_lin_v = 2
         self._k_rot = 3
         self._d_rot = 0
@@ -96,7 +97,7 @@ class VirtualDrone(object):
                 filtered_d_errors[i] = self.filter(self._last_d_errors[i],d_errors[i],self._last_filtered_d_errors[i])
             self._twist.linear.x =  self.get_PD(errors[0],filtered_d_errors[0],self._k_lin_h,self._d_lin_h,self._max_v_lin)
             self._twist.linear.y =  self.get_PD(errors[1],filtered_d_errors[1],self._k_lin_h,self._d_lin_h,self._max_v_lin)
-            self._twist.linear.z =  self.get_PD(errors[2],filtered_d_errors[2],self._k_lin_v,self._d_lin_v,self._max_v_lin)
+            self._twist.linear.z =  self.get_PD(errors[2],filtered_d_errors[2],self._k_lin_v,self._d_lin_v,self._max_v_h)
             self._twist.angular.z = self.get_PD(errors[3],filtered_d_errors[3],self._k_rot,self._d_rot,self._max_v_rot)
             self._last_errors = errors
             self._last_d_errors = d_errors
