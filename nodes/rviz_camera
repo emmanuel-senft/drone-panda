@@ -2,9 +2,8 @@
 import rospy
 import numpy as np
 from geometry_msgs.msg import PoseStamped
-from visualization_msgs.msg import Marker
 from std_msgs.msg import Float64MultiArray
-
+import tf2_ros
 import signal
 import sys
 
@@ -13,9 +12,12 @@ class CameraDriver:
         self.panda_sub = rospy.Subscriber(
             "/panda_ik/panda_commanded_pose", PoseStamped, self.get_panda_state
         )
-        self.drone_sub = rospy.Subscriber(
-            "/currDrone", Marker, self.get_drone_state
-        )
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        
+        #self.drone_sub = rospy.Subscriber(
+        #    "/panda_ik/drone_output", PoseStamped, self.get_drone_state
+        #)
         self.alternate_pose = rospy.Subscriber(
             "/alternative_pose", PoseStamped, self.get_alternate_pose_state
         )
@@ -33,7 +35,7 @@ class CameraDriver:
 
     def get_drone_state(self, msg):
         self.drone_position = np.array(
-            [msg.pose.position.x, msg.pose.position.y, msg.pose.position.z]
+            [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
         )
 
     def get_alternate_pose_state(self, msg):
@@ -44,6 +46,14 @@ class CameraDriver:
     def run(self):
         r = rospy.Rate(100)
         while not rospy.is_shutdown():
+            try:
+                trans = self.tfBuffer.lookup_transform('panda_link0', 'drone', rospy.Time())
+                self.get_drone_state(trans)
+            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+                continue
+            print(self.panda_position)
+            print(self.drone_position)
+            print(self.alternate_pose_position)
             if (len(self.panda_position) > 0) & (len(self.drone_position) > 0) & (len(self.alternate_pose_position) > 0):
                 look_at = (self.panda_position + self.drone_position + self.alternate_pose_position)/3.0
                 params = Float64MultiArray()
