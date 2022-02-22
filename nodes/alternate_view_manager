@@ -7,6 +7,7 @@ import signal
 import sys
 import numpy as np
 import tf2_ros
+import time
 import tf_conversions
 import geometry_msgs.msg
 
@@ -24,6 +25,7 @@ class ViewManager(object):
         self._alternatives = []
         self._costs = []
         self._current_cost = 0
+        self._timestamps = []
 
         self._id = 0
 
@@ -69,19 +71,40 @@ class ViewManager(object):
             if np.linalg.norm(alt_pos-proposed_pos)<0.1 and not sim_view:
                 if msg.cost.data<self._costs[ii]:
                     self._alternatives[ii] = msg.pose
+                    self._timestamps[ii] = time.time()
                     sim_view = True
                 else:
-                    return
+                    self._timestamps[ii] = time.time()
+                    continue
         
         # print(sim_view, len(self._alternatives))
 
         if not sim_view:
             self._alternatives.append(msg.pose)
             self._costs.append(msg.cost.data)
-        
+            self._timestamps.append(time.time())
+
+        # check for expired viewpoints
+        curr_time = time.time()
+        expired_time = 5.0 # five seconds
+        ii = 0
+
+        while ii<len(self._timestamps):
+            if (self._timestamps[ii]+expired_time<curr_time):
+                self._alternatives.pop(ii)
+                self._costs.pop(ii)
+                self._timestamps.pop(ii)
+            else:
+                ii+=1
+
+        # No more than 5 total stored viewpoints
         if len(self._alternatives) > 5:
-            self._alternatives.pop(0)
-            self._costs.pop(0)
+            max_cost_ind = np.argsort(self._costs)[-1]
+            self._alternatives.pop(max_cost_ind)
+            self._costs.pop(max_cost_ind)
+            self._timestamps.pop(max_cost_ind)
+
+        # 
         sorted_inds = np.argsort(self._costs)
         selected_ind = sorted_inds[self._id]
         self._pose_display_pub.publish(self._alternatives[selected_ind])
