@@ -60,6 +60,18 @@ class VirtualDrone(object):
         self._vel_pub = rospy.Publisher("/tello/vel",Twist,queue_size=1,latch=True)
         self._pose_sub = rospy.Subscriber("/panda_ik/drone_output", PoseStamped, self.on_pose)
         self._pid_sub = rospy.Subscriber("/pid_param", Pose, self.on_pid_param)
+        self._ik_sub = rospy.Subscriber("/panda_ik/event",String, self.on_event)
+
+    def on_event(self, msg):
+        if msg.data == "start_goal_move":
+            self._max_v_lin = .4
+            self._k_lin_h = 2
+            self._d_lin_h = 10
+        if msg.data == "finish_goal_move":
+            self._max_v_lin = .2
+            self._k_lin_h = .8
+            self._d_lin_h = 5
+
 
     def on_pid_param(self, msg):
         self._k_lin_h = msg.position.x
