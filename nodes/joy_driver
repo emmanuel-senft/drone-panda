@@ -4,7 +4,7 @@ import rospy
 import actionlib
 import control_msgs.msg 
 from geometry_msgs.msg import Twist, PoseStamped
-import franka_gripper.msg
+from franka_gripper.msg import GraspAction, MoveAction, GraspGoal, MoveGoal
 from sensor_msgs.msg import Joy
 from std_msgs.msg import String
 import tf2_geometry_msgs
@@ -24,7 +24,8 @@ class JoyDriver(object):
         if self._virtual_robot:
             self._command_pub = rospy.Publisher("/simulator/commands", String, queue_size=1)
         else:
-            self._grasp_client = actionlib.SimpleActionClient('/franka_gripper/grasp', franka_gripper.msg.GraspAction)
+            self._grasp_client = actionlib.SimpleActionClient('/franka_gripper/grasp', GraspAction)
+            self._move_client = actionlib.SimpleActionClient('/franka_gripper/move', MoveAction)
         
         self._drone_command_pub = rospy.Publisher("/tello/cmd", String, queue_size=1)
         self._view_command_pub = rospy.Publisher('/view_manager/command', String, queue_size=1)
@@ -39,6 +40,12 @@ class JoyDriver(object):
         self._ax5_init = False
         self._y_pressed = False
             
+
+    def mapping(self,x,low=0.005,high=.25):
+        a = (np.log(high)-np.log(low))/0.9
+        b = np.exp(np.log(low)-.1*a)
+        return np.sign(x)*b*((np.exp(a*np.abs(x))-1))
+        
     def on_joy(self, msg):
         ax = np.array(msg.axes)
         if ax[2] != 0:
@@ -50,15 +57,15 @@ class JoyDriver(object):
         if not self._ax5_init:
             ax[5]=1
         t = Twist()
-        t.linear.x = ax[1]/4
-        t.linear.y = ax[0]/4
-        t.linear.z = (ax[2]-ax[5])/8
-        t.angular.x = -ax[3]
-        t.angular.y = ax[4]
+        t.linear.x = self.mapping(ax[1])
+        t.linear.y = self.mapping(ax[0])
+        t.linear.z = self.mapping((ax[2]-ax[5])/2)
+        t.angular.x = self.mapping(-ax[3],low=.01,high=1)
+        t.angular.y = self.mapping(ax[4],low=.01,high=1)
         if msg.buttons[4]:
-            t.angular.z = -np.pi
+            t.angular.z = -np.pi/4
         if msg.buttons[5]:
-            t.angular.z = np.pi
+            t.angular.z = np.pi/4
         self._twist_pub.publish(t)
 
         if msg.buttons[0] and not self._a_pressed:
@@ -67,22 +74,20 @@ class JoyDriver(object):
                 self._command_pub.publish("toggle_gripper")
             else:
                 if not self._grasped:
-                    goal = franka_gripper.msg.GraspGoal()
+                    goal = GraspGoal()
                     goal.width = 0
                     goal.epsilon.inner = .05
                     goal.epsilon.outer = .05
                     goal.speed = .1
-                    goal.force = 10
+                    goal.force = 30
                     self._grasp_client.send_goal(goal)
-                    print(self._grasp_client.wait_for_server())
+                    print("close "+str(self._grasp_client.wait_for_server()))
                 else:
-                    goal = franka_gripper.msg.GraspGoal()
-                    goal = franka_gripper.msg.GraspGoal()
+                    goal = MoveGoal()
                     goal.width = 0.07
                     goal.speed = .1
-                    goal.force = 10
-                    self._grasp_client.send_goal(goal)
-                    self._grasp_client.wait_for_server()
+                    self._move_client.send_goal(goal)
+                    print("open "+str(self._move_client.wait_for_server()))
 
                 self._grasped = not self._grasped
         
