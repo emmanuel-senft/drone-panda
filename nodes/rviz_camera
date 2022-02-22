@@ -51,9 +51,9 @@ class CameraDriver:
                 self.get_drone_state(trans)
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 continue
-            print(self.panda_position)
-            print(self.drone_position)
-            print(self.alternate_pose_position)
+            # print(self.panda_position)
+            # print(self.drone_position)
+            # print(self.alternate_pose_position)
             if (len(self.panda_position) > 0) & (len(self.drone_position) > 0) & (len(self.alternate_pose_position) > 0):
                 look_at = (self.panda_position + self.drone_position + self.alternate_pose_position)/3.0
                 params = Float64MultiArray()
