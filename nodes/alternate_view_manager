@@ -52,7 +52,7 @@ class ViewManager(object):
         if msg.data == "go":
             self._drone_goal_pub.publish(self._alternatives[selected_ind])
         if msg.data == "new":
-            if self._id<2:
+            if self._id<(len(self._alternatives)-1):
                 self._id +=1
             else:
                 self._id = 0
@@ -68,11 +68,11 @@ class ViewManager(object):
         proposed_pos = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z])
         for ii in range(0,len(self._alternatives)):
             alt_pos = np.array([self._alternatives[ii].pose.position.x, self._alternatives[ii].pose.position.y, self._alternatives[ii].pose.position.z])
-            if np.linalg.norm(alt_pos-proposed_pos)<0.1 and not sim_view:
+            if np.linalg.norm(alt_pos-proposed_pos)<0.2 and not sim_view:
+                sim_view = True
                 if msg.cost.data<self._costs[ii]:
                     self._alternatives[ii] = msg.pose
                     self._timestamps[ii] = time.time()
-                    sim_view = True
                 else:
                     self._timestamps[ii] = time.time()
                     continue
@@ -94,6 +94,9 @@ class ViewManager(object):
                 self._alternatives.pop(ii)
                 self._costs.pop(ii)
                 self._timestamps.pop(ii)
+
+                if(self._id==len(self._alternatives)):
+                    self._id = len(self._alternatives)-1
             else:
                 ii+=1
 
@@ -109,6 +112,8 @@ class ViewManager(object):
         selected_ind = sorted_inds[self._id]
         self._pose_display_pub.publish(self._alternatives[selected_ind])
         self.tf_from_pose_stamped(self._alternatives[selected_ind])
+
+        # print("num views: ",len(self._alternatives))
 
         # print("Current cost: "+str(self._current_cost))
         # print("Best cost: "+str(min(self._costs)))
