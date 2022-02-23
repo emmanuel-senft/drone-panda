@@ -19,6 +19,7 @@ class ViewManager(object):
         self._cost_sub = rospy.Subscriber('/panda_ik/view_cost', Float32, self.on_cost)
         self._pose_sub = rospy.Subscriber('/panda_ik/global_solutions', PoseCost, self.on_pose)
         self._command_sub = rospy.Subscriber('/view_manager/command', String, self.on_command)
+        self._command_sub = rospy.Subscriber('/panda_ik/events', String, self.on_pandaikmove)
 
         self.br = tf2_ros.TransformBroadcaster()
         
@@ -26,6 +27,8 @@ class ViewManager(object):
         self._costs = []
         self._current_cost = 0
         self._timestamps = []
+    
+        self.drone_view_moving = False
 
         self._id = 0
 
@@ -44,6 +47,12 @@ class ViewManager(object):
         t.transform.rotation.w = posestamped.pose.orientation.w
         self.br.sendTransform(t)
 
+    def on_pandaikmove(self, msg):
+        if msg.data == "start_goal_move":
+            self.drone_view_moving = True
+        elif msg.data == "finish_goal_move":
+            self.drone_view_moving = False
+            self._id = 0
     
     def on_command(self, msg):
         sorted_inds = np.argsort(self._costs)
@@ -57,7 +66,6 @@ class ViewManager(object):
             else:
                 self._id = 0
 
-            
             self._pose_display_pub.publish(self._alternatives[selected_ind])
             self.tf_from_pose_stamped(self._alternatives[selected_ind])
 
@@ -110,7 +118,8 @@ class ViewManager(object):
         # 
         sorted_inds = np.argsort(self._costs)
         selected_ind = sorted_inds[self._id]
-        self._pose_display_pub.publish(self._alternatives[selected_ind])
+        if self.drone_view_moving:
+            self._pose_display_pub.publish(self._alternatives[selected_ind])
         self.tf_from_pose_stamped(self._alternatives[selected_ind])
 
         # print("num views: ",len(self._alternatives))
