@@ -153,6 +153,7 @@ catkin_install_python(PROGRAMS
     nodes/pcl_plane_to_bounding
     nodes/alternate_view_manager
     nodes/autonomous_mapping
+    nodes/torque_filter
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(DHDC)

@@ -9,11 +9,15 @@ Panels:
         - /TF1/Tree1
         - /CameraPub1/Visibility1
         - /Drone Camera1
+        - /Pose1
         - /Light1/Direction1
         - /Pose2
         - /PointCloud22
         - /Marker2
         - /Pose3
+        - /Real drone1
+        - /Alt drone1
+        - /WrenchStamped1
       Splitter Ratio: 0.5278858542442322
     Tree Height: 841
   - Class: rviz/Selection
@@ -34,7 +38,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: End Effector
   - Class: drone_panel/DronePanel
     Name: DronePanel
 Preferences:
@@ -160,56 +164,10 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        camera1:
-          Value: false
-        camera_base:
-          Value: true
-        camera_body:
-          Value: true
-        camera_visor:
-          Value: true
-        drone:
-          Value: true
-        ee_camera:
-          Value: true
-        ft_sensor_link:
-          Value: true
-        mocap_world:
-          Value: true
-        panda_gripper:
-          Value: false
-        panda_hand:
-          Value: false
-        panda_leftfinger:
-          Value: true
-        panda_link0:
-          Value: false
-        panda_link1:
-          Value: true
-        panda_link2:
-          Value: true
-        panda_link3:
-          Value: true
-        panda_link4:
-          Value: true
-        panda_link5:
-          Value: true
-        panda_link6:
-          Value: true
-        panda_link7:
-          Value: true
-        panda_link8:
-          Value: true
-        panda_rightfinger:
-          Value: true
-        sim_panda_gripper:
-          Value: false
-        static_camera_link:
-          Value: false
       Marker Alpha: 1
       Marker Scale: 0.20000000298023224
       Name: TF
@@ -217,53 +175,28 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        panda_link0:
-          mocap_world:
-            drone:
-              camera1:
-                {}
-          panda_link1:
-            panda_link2:
-              panda_link3:
-                panda_link4:
-                  panda_link5:
-                    panda_link6:
-                      panda_link7:
-                        ft_sensor_link:
-                          panda_link8:
-                            camera_base:
-                              camera_body:
-                                {}
-                              camera_visor:
-                                ee_camera:
-                                  {}
-                            panda_hand:
-                              panda_leftfinger:
-                                {}
-                              panda_rightfinger:
-                                {}
-                              sim_panda_gripper:
-                                panda_gripper:
-                                  {}
-          static_camera_link:
-            {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /viz/meshes
       Name: Marker
       Namespaces:
-        points̗: true
-        pointsԃ: true
-        pointsइ: true
-        pointsଽ: true
-        pointsᖱ: true
-        ̗: true
-        ԃ: true
-        इ: true
-        ଽ: true
-        ᖱ: true
+        "\x00": true
+        "\x01": true
+        "\x02": true
+        "\x03": true
+        "\x04": true
+        "\x05": true
+        "\x06": true
+        "points\x00": true
+        "points\x01": true
+        "points\x02": true
+        "points\x03": true
+        "points\x04": true
+        "points\x05": true
+        "points\x06": true
       Queue Size: 100
       Value: true
     - Background Color: 0; 0; 0
@@ -279,6 +212,7 @@ Visualization Manager:
       Queue Size: 2
       Value: true
       Visibility:
+        Alt drone: true
         Drone Camera: true
         End Effector: true
         Grid: true
@@ -286,9 +220,11 @@ Visualization Manager:
         Marker: true
         PointCloud2: true
         Pose: true
+        Real drone: true
         RobotModel: true
         TF: true
         Value: true
+        WrenchStamped: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -408,7 +344,7 @@ Visualization Manager:
       Use rainbow: true
       Value: true
     - Class: rviz/Image
-      Enabled: false
+      Enabled: true
       Image Topic: /k4a/rgb/image_raw
       Max Value: 1
       Median window: 5
@@ -418,13 +354,13 @@ Visualization Manager:
       Queue Size: 2
       Transport Hint: raw
       Unreliable: false
-      Value: false
+      Value: true
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /currDrone
       Name: Marker
       Namespaces:
-        currDrone: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -432,7 +368,7 @@ Visualization Manager:
       Axes Radius: 0.10000000149011612
       Class: rviz/Pose
       Color: 0; 255; 0
-      Enabled: true
+      Enabled: false
       Head Length: 0.029999999329447746
       Head Radius: 0.009999999776482582
       Name: Pose
@@ -441,6 +377,63 @@ Visualization Manager:
       Shaft Radius: 0.004999999888241291
       Shape: Arrow
       Topic: /alternative_pose
+      Unreliable: false
+      Value: false
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        drone_curr_mesh:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: Real drone
+      Robot Description: drone_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        drone_alt_mesh:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: Alt drone
+      Robot Description: drone_alt_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Alpha: 1
+      Arrow Width: 0.5
+      Class: rviz/WrenchStamped
+      Enabled: true
+      Force Arrow Scale: 0
+      Force Color: 204; 51; 51
+      Hide Small Values: true
+      History Length: 1
+      Name: WrenchStamped
+      Queue Size: 10
+      Topic: /ft
+      Torque Arrow Scale: 2
+      Torque Color: 204; 204; 51
       Unreliable: false
       Value: true
   Enabled: true
@@ -471,7 +464,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.458582878112793
+      Distance: 3.0757036209106445
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -487,9 +480,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6485986709594727
+      Pitch: 0.4635988473892212
       Target Frame: <Fixed Frame>
-      Yaw: 0.8985984325408936
+      Yaw: 2.7667386531829834
     Saved: ~
 Window Geometry:
   Displays:
@@ -503,7 +496,7 @@ Window Geometry:
   Height: 2708
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000004000000000000028d00000947fc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b000fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000b2fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000006e0000047b000001bc01000039fa000000010100000002fb000000180045006e00640020004500660066006500630074006f00720100000000ffffffff000000e600fffffffb000000100044006900730070006c006100790073010000000000000305000001f700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d006100670065000000010c0000020f0000000000000000fb0000001800440072006f006e0065002000430061006d00650072006101000004f5000004c00000002600ffffff000000010000016c0000037cfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000037c0000013200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300001344000000a5fc0100000003fb0000001400440072006f006e006500500061006e0065006c01000000000000134400000a4c00fffffffb0000000800540069006d0065000000000000000329000008d800fffffffb0000000800540069006d00650100000000000004500000000000000000000010ab0000094700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000064000000947fc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b000fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000b2fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000006e0000047b000001bc01000039fa000000000100000002fb000000180045006e00640020004500660066006500630074006f00720100000000ffffffff000000e600fffffffb000000100044006900730070006c006100790073010000000000000305000001f700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d006100670065000000010c0000020f0000000000000000fb0000001800440072006f006e0065002000430061006d00650072006101000004f5000004c00000002600ffffff000000010000016c0000037cfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000037c0000013200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300001344000000a5fc0100000003fb0000001400440072006f006e006500500061006e0065006c01000000000000134400000d6c00fffffffb0000000800540069006d0065000000000000000329000008d800fffffffb0000000800540069006d0065010000000000000450000000000000000000000cf80000094700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
