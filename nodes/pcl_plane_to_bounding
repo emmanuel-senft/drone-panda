@@ -366,12 +366,9 @@ def processPlanes(data):
 
         # remove noise
         # for ii in range(0,1):
-        bin_image = ndimage.binary_erosion(bin_image,iterations=1).astype(bin_image.dtype)
-        bin_image = ndimage.binary_dilation(bin_image,iterations=1).astype(bin_image.dtype)
         
         # fill in
-        bin_image = ndimage.binary_dilation(bin_image,iterations=3).astype(bin_image.dtype)
-        bin_image = ndimage.binary_erosion(bin_image,iterations=3).astype(bin_image.dtype)
+        bin_image = ndimage.binary_dilation(bin_image,iterations=1).astype(bin_image.dtype)
 
         # plt.imshow(bin_image)
         # plt.show()
@@ -427,8 +424,8 @@ def listenForPlanes():
     global marker_pub, plane_pub
     rospy.init_node('plane_to_bounding')
     rospy.Subscriber("/pclplanes", PlanesInliersArr, processPlanes)
-    marker_pub = rospy.Publisher("/viz/meshes",Marker,queue_size = 1,latch =False)
-    plane_pub = rospy.Publisher("/panda_ik/planes",Planes,queue_size = 1,latch =False)
+    marker_pub = rospy.Publisher("/viz/meshes",Marker,queue_size = 1,latch =True)
+    plane_pub = rospy.Publisher("/panda_ik/planes",Planes,queue_size = 1,latch =True)
     rospy.spin()
 
 

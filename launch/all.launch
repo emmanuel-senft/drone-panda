@@ -61,6 +61,7 @@
     </node>
 
     <node pkg="drone_panda" type="rviz_camera" name="rviz_camera" output="screen" />
+    <node pkg="drone_panda" type="path_recorder" name="path_recorder" output="screen" />
 
     <node pkg="drone_panda" type="velocity_controller" name="velocity_controller" output="screen">
     </node>
@@ -69,6 +70,11 @@
 
     <node name="compress_virtual" pkg="image_transport" type="republish" args="raw in:=/rviz1/camera1/image compressed out:=/virtual_camera/image_repub">
     </node>
+
+
+    <node pkg="rosbag" type="record" name="rosbag_record"
+       args="record /tf /panda_ik/drone_goal /panda_ik/drone_output /panda_ik/event /panda_ik/input /panda_ik/output /panda_ik/view_cost /panda_ik/panda_commanded_pose
+       /panda_ik/planes /vrpn_client_node/drone/pose /rvizToggle /panda_ik/global_solutions /event /path /JointController/panda/joint_command -o /home/senft/src/jup/bags/bag.bag"/>
 
 
         <node pkg="drone_panda" type="pcl_plane_to_bounding" name="pcl_plane_to_bounding"/>
@@ -89,8 +95,9 @@
             <remap from="/panda_ik/output" to="/JointController/panda/joint_command"/>
 		    <param name="URDF" type="string" value="$(find drone_panda)/urdfs/panda.urdf" />
 	    </node>
-        <!-- <node pkg="drone_panda" type="pc_publish" name="pc_publish"/> -->
+        <node pkg="drone_panda" type="pc_publish" name="pc_publish"/>
         <node pkg="drone_panda" type="torque_filter" name="torque_filter"/>
+        <!-- <node pkg="drone_panda" type="pc_record" name="pc_record"/> -->
 	</group>
 
     <param name="drone_description" textfile="$(find drone_panda)/urdfs/drone.urdf" />
@@ -118,7 +125,6 @@
     <group unless="$(arg virtual_drone)">
         <include file="$(find drone_panda)/launch/mocap.launch">  
         </include>
-        <node pkg="drone_panda" type="tello_driver_launcher" name="tello_driver_launcher"/>
 
         <node pkg="drone_panda" type="static_publisher" name="mocap_camera_static_publisher">
             <param name="file_name" type="string" value="transforms.yaml" />

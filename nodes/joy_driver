@@ -39,6 +39,7 @@ class JoyDriver(object):
         self._ax2_init = False
         self._ax5_init = False
         self._y_pressed = False
+        self._right_pressed = False
             
 
     def mapping(self,x,low=0.005,high=.25):
@@ -111,6 +112,12 @@ class JoyDriver(object):
             self._view_command_pub.publish("go")
         if not msg.buttons[3] and self._y_pressed:
             self._y_pressed = False
+
+        if msg.axes[6] and not self._right_pressed:
+            self._right_pressed = True
+            self._view_command_pub.publish("new")
+        if not msg.axes[6] and self._right_pressed:
+            self._right_pressed = False
     
     def run(self):
         rospy.spin()

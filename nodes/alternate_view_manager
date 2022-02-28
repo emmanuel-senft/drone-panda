@@ -13,13 +13,13 @@ import geometry_msgs.msg
 
 class ViewManager(object):
     def __init__(self):
-        self._pose_display_pub = rospy.Publisher("/alternative_pose", PoseStamped, queue_size=1)
+        # self._pose_display_pub = rospy.Publisher("/alternative_pose", PoseStamped, queue_size=1)
         self._drone_goal_pub = rospy.Publisher('/panda_ik/drone_goal', PoseStamped, queue_size=1)
         
         self._cost_sub = rospy.Subscriber('/panda_ik/view_cost', Float32, self.on_cost)
         self._pose_sub = rospy.Subscriber('/panda_ik/global_solutions', PoseCost, self.on_pose)
         self._command_sub = rospy.Subscriber('/view_manager/command', String, self.on_command)
-        self._command_sub = rospy.Subscriber('/panda_ik/events', String, self.on_pandaikmove)
+        self._command_sub2 = rospy.Subscriber('/panda_ik/event', String, self.on_pandaikmove)
 
         self.br = tf2_ros.TransformBroadcaster()
         
@@ -66,7 +66,6 @@ class ViewManager(object):
             else:
                 self._id = 0
 
-            self._pose_display_pub.publish(self._alternatives[selected_ind])
             self.tf_from_pose_stamped(self._alternatives[selected_ind])
 
 
@@ -118,9 +117,8 @@ class ViewManager(object):
         # 
         sorted_inds = np.argsort(self._costs)
         selected_ind = sorted_inds[self._id]
-        if self.drone_view_moving:
-            self._pose_display_pub.publish(self._alternatives[selected_ind])
-        self.tf_from_pose_stamped(self._alternatives[selected_ind])
+        if not self.drone_view_moving:
+            self.tf_from_pose_stamped(self._alternatives[selected_ind])
 
         # print("num views: ",len(self._alternatives))
 

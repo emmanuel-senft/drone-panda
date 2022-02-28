@@ -154,6 +154,7 @@ catkin_install_python(PROGRAMS
     nodes/alternate_view_manager
     nodes/autonomous_mapping
     nodes/torque_filter
+    nodes/path_recorder
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(DHDC)
