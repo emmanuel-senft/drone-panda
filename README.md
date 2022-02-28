@@ -4,7 +4,7 @@ Robot Controller
 ----------------
 
 *This work is part of a larger project, it is designed to be used with the
-[panda-ik](https://github.com/emmanuel-senft/panda_ik) and .*
+[panda-ik](https://github.com/emmanuel-senft/panda_ik) and [panda-drone-msgs](https://github.com/emmanuel-senft/drone-ros-msgs).*
 
 Installation
 ------------
